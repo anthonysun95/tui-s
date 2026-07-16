@@ -546,7 +546,1665 @@
   figure.frame-img,figure.tile{margin:0;display:flex;flex-direction:column;min-width:0}
   figure.tile > .frame-img{flex:0 0 auto}
 
-…20784 tokens truncated…rLoopForm(slide, all){
+  /* 瑞士风图文混排: 只用直角、发丝线、单一 accent；图像容器不加圆角/阴影 */
+  .swiss-img-split{display:grid;grid-template-columns:5fr 7fr;gap:3vw;align-items:start;flex:1;min-height:0}
+  .swiss-img-split.reverse{grid-template-columns:7fr 5fr}
+  .swiss-img-split.align-bottom{align-items:end}
+  .swiss-img-split.align-bottom .swiss-img-copy{align-self:end}
+  .swiss-img-split.align-image-bottom{align-items:end;padding-bottom:var(--nav-safe-bottom)}
+  .swiss-img-split.align-image-bottom .swiss-img-copy{align-self:end}
+  .swiss-img-split.align-image-bottom figure.tile{align-self:end;position:relative}
+  .swiss-img-split.align-image-bottom figure.tile > .swiss-img-caption{
+    position:absolute;left:0;right:0;top:calc(100% + var(--sp-4));margin-top:0
+  }
+  .nav-safe-bottom{padding-bottom:var(--nav-safe-bottom)}
+  .nav-safe-bottom-tight{padding-bottom:calc(var(--nav-safe-bottom) * .65)}
+  .swiss-img-copy{display:flex;flex-direction:column;gap:var(--sp-6);min-width:0}
+  .swiss-img-copy .rule{margin:0}
+  .swiss-img-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5);align-items:start;margin-top:var(--sp-7)}
+  .swiss-img-grid.two{grid-template-columns:repeat(2,1fr)}
+  .swiss-img-grid.tight{margin-top:0}
+  .swiss-img-caption{
+    display:flex;justify-content:space-between;gap:var(--sp-5);
+    margin-top:var(--sp-4);
+    font-family:var(--mono);font-size:max(14px,.74vw);
+    letter-spacing:.16em;text-transform:uppercase;color:var(--text-helper);
+    border-top:1px solid var(--border-subtle);padding-top:var(--sp-4)
+  }
+  .swiss-img-caption strong{
+    font-family:var(--sans),var(--sans-zh);font-size:max(16px,.9vw);
+    font-weight:600;letter-spacing:0;text-transform:none;color:var(--text-primary)
+  }
+
+  /* ============ Bar Chart (扁平几何图表) ============ */
+  .bar-chart{display:flex;flex-direction:column;gap:1.4vh}
+  .bar-row{display:grid;grid-template-columns:8em 1fr 4em;gap:1.4vw;align-items:center}
+  .bar-row .bar-label{font-family:var(--mono);font-size:max(14px,.84vw);letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+  .bar-row .bar-track{height:14px;background:rgba(127,127,127,.18);position:relative}
+  .bar-row .bar-fill{height:100%;background:var(--accent);position:absolute;left:0;top:0}
+  .bar-row .bar-fill.ink{background:currentColor}
+  .bar-row .bar-value{font-family:var(--sans);font-weight:700;font-size:max(16px,1.05vw);text-align:right;font-feature-settings:"tnum"}
+
+  /* ============ 导航 ============ */
+  /* 底部分页导航: 仅保留方块本身,无背景无描边 */
+  #nav{position:fixed;left:50%;bottom:2vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:0;background:transparent;border:0}
+  #nav .dot{width:6px;height:6px;background:rgba(0,0,0,.28);cursor:pointer;transition:all .25s ease;border:0;padding:0;border-radius:0}
+  #nav .dot:hover{background:rgba(0,0,0,.55)}
+  #nav .dot.active{background:var(--accent);width:18px}
+  body.dark-bg #nav .dot{background:rgba(255,255,255,.32)}
+  body.dark-bg #nav .dot.active{background:var(--accent)}
+
+  #hint{position:fixed;bottom:2.4vh;right:2.5vw;z-index:30;font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.4;color:var(--ink-tint, currentColor)}
+  body.dark-bg #hint{color:var(--paper);opacity:.4}
+  body.low-power #hint{color:var(--accent);opacity:.72}
+  body.dark-bg.low-power #hint{color:var(--paper);opacity:.72}
+
+  /* ESC 索引页: 动画元素强制可见 (覆盖 motion-ready 的 opacity:0) */
+  #overview [data-anim]{opacity:1!important;transform:none!important}
+  #overview .slide *{animation:none!important;transition:none!important}
+
+  /* 统一卡片样式 token: card-fill (默认灰底 · 中性) + card-ink (反转高对比) + card-accent (单一焦点) */
+  .card-fill{background:#f5f5f4;border:0;color:var(--text-primary)}
+  .card-ink{background:var(--ink);border:0;color:var(--paper)}
+  .card-ink .t-meta,.card-ink .t-cat{color:rgba(255,255,255,.6)}
+  .card-accent{background:var(--accent);border:0;color:var(--accent-on)}
+  .card-accent .t-meta,.card-accent .t-cat{color:var(--accent-on)}
+
+  /* ============ 动效 (与原模板一致) ============ */
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.motion-ready [data-animate="pipeline"] [data-anim]{opacity:.15}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,
+  body.low-power *::before,
+  body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],
+  body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  /* ============================================================
+     ↓↓↓ V2 EXTENSIONS · Canvas Mode + 参考图新类
+     验证效果后沉淀回 template-swiss.html
+     ============================================================ */
+
+  /* Windows 适配:雅黑没有 ExtraLight 200,中文大字号字重补偿 */
+  body.is-win .name-mega,
+  body.is-win .num-mega,
+  body.is-win .kpi-thin,
+  body.is-win .tl-node .multi{
+    font-weight:300;letter-spacing:-.02em;
+  }
+  body.is-win [style*="font-weight:200"]{font-weight:300 !important}
+
+  /* 全屏铺满模式 · 关闭 WebGL · 卡片即页面 */
+  body.canvas-mode{background:var(--paper)}
+  body.canvas-mode canvas.bg{display:none !important}
+  body.canvas-mode .slide{background:var(--paper);padding:0;align-items:stretch;justify-content:stretch}
+  body.canvas-mode .slide.hero{background:var(--paper)}
+
+  .canvas-card{
+    width:100vw;
+    height:100vh;
+    background:var(--paper);color:var(--ink);
+    padding:5.6vh 5vw 4.4vh;
+    display:flex;flex-direction:column;
+    position:relative;overflow:hidden;
+    box-shadow:none;
+    border-radius:0;
+  }
+  .slide.dark .canvas-card{background:var(--ink);color:var(--paper)}
+  .slide.accent .canvas-card{background:var(--accent);color:var(--accent-on)}
+  .slide.grey .canvas-card{background:var(--grey-1);color:var(--ink)}
+  .slide.split .canvas-card{padding:0;flex-direction:row}
+
+  /* ============ ASCII 点阵呼吸场 · IKB 封面/封底专用 ============
+     用法:在 .canvas-card(或 split .half.b-accent)内首位插入 <canvas class="ascii-bg" aria-hidden="true">.
+     动画由本文件底部的 ASCII IIFE 自动启动,所有 canvas.ascii-bg 都会被扫到.
+     其他内容靠 .canvas-card > *:not(.ascii-bg){z-index:1} 自动浮在上层. */
+  canvas.ascii-bg{
+    position:absolute;inset:0;width:100%;height:100%;
+    pointer-events:none;z-index:0;
+    mix-blend-mode:screen;opacity:.92;
+  }
+  .canvas-card > *:not(.ascii-bg){position:relative;z-index:1}
+  .slide.accent .canvas-card .chrome-min{color:rgba(255,255,255,.62)}
+  .slide.accent .canvas-card .t-meta{color:rgba(255,255,255,.7)}
+  .split-half > .half.b-accent .chrome-min{color:rgba(255,255,255,.62)}
+
+  /* 编号目录页 · 超大数字 + 国家名风格 — 越大越细 */
+  .num-mega{
+    font-family:var(--sans);font-weight:200;
+    font-size:9vw;line-height:1;letter-spacing:-.04em;
+    font-feature-settings:"tnum"
+  }
+  .num-mega.thin{font-weight:200}
+  .name-mega{
+    font-family:var(--sans);font-weight:200;
+    font-size:9vw;line-height:1;letter-spacing:-.035em;
+  }
+  .name-mega.muted{color:var(--grey-3)}
+
+  /* 细体超大 KPI — 字号越大权重越低 */
+  .kpi-thin{
+    font-family:var(--sans);font-weight:200;
+    font-size:14vw;line-height:.92;letter-spacing:-.045em;
+    font-feature-settings:"tnum"
+  }
+  .kpi-thin .unit{font-size:.3em;font-weight:300;opacity:.55;margin-left:.15em;vertical-align:.6em}
+  .kpi-thin.accent{color:var(--accent)}
+  .kpi-thin-sm{
+    font-family:var(--sans);font-weight:250;
+    font-size:5.6vw;line-height:1.04;letter-spacing:-.03em;
+    font-feature-settings:"tnum"
+  }
+  .kpi-thin-sm .unit{font-size:.3em;font-weight:300;opacity:.55;margin-left:.12em;vertical-align:.45em}
+
+  /* 4 列细线 KPI 行 — 顶部一根 hairline,内部不再加竖线 */
+  /* 4 列 KPI: 用纵向分割线建立网格感 (Carbon 2x grid 模数) */
+  .kpi-row-4{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    gap:0;padding-top:2.4vh;
+    border-top:1px solid var(--grey-2)
+  }
+  .kpi-row-4 > .kpi-cell{
+    padding:1.6vh 1.6vw 0;
+    border-left:1px solid var(--grey-2)
+  }
+  .kpi-row-4 > .kpi-cell:first-child{padding-left:0;border-left:none}
+  .kpi-cell .lbl{font-family:var(--mono);font-size:max(14px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-bottom:1.2vh}
+  .kpi-cell .nb{font-family:var(--sans);font-weight:250;font-size:3.2vw;line-height:1;letter-spacing:-.025em;font-feature-settings:"tnum"}
+  .kpi-cell .nb .unit{font-size:.32em;font-weight:300;opacity:.6;margin-left:.1em;vertical-align:.4em}
+  .kpi-cell .note{font-family:var(--sans),var(--sans-zh);font-size:max(16px,.92vw);line-height:1.5;opacity:.7;margin-top:1.2vh}
+
+  /* 时间线轴 — 通用 axis token, 横纵共享
+     axis 列 = 24px 固定宽,dot 直径 8px,绝对居中在 axis 列中线 (12px)
+     虚线绝对定位 left:12px,与 dot 中心严格对齐 */
+  .timeline-v{
+    --tl-axis-w:24px;        /* axis 列固定宽度 */
+    --tl-dot:8px;            /* 圆点直径 */
+    position:relative;margin-top:var(--sp-7)
+  }
+  .timeline-v::before{
+    content:"";position:absolute;
+    left:calc(var(--tl-axis-w) / 2);
+    transform:translateX(-50%);
+    top:var(--sp-5);bottom:var(--sp-5);
+    width:1px;
+    background:repeating-linear-gradient(to bottom,currentColor 0 4px,transparent 4px 8px);
+    opacity:.35;pointer-events:none;z-index:0
+  }
+  .tl-node{
+    position:relative;
+    display:grid;
+    grid-template-columns:var(--tl-axis-w) minmax(0,7em) minmax(0,7.6em) 1fr;
+    gap:0 var(--sp-5);
+    align-items:center;
+    padding:var(--sp-7) 0
+  }
+  /* 进度点: 纯色实心圆,无背景无描边,精确居中在 axis 列中线 */
+  .tl-node .dot{
+    width:var(--tl-dot);height:var(--tl-dot);
+    border-radius:50%;
+    background:currentColor;
+    justify-self:center;
+    z-index:1
+  }
+  .tl-node.accent .dot{background:var(--accent)}
+  .tl-node .yr{
+    font-family:var(--mono);font-weight:500;
+    font-size:max(14px,1vw);letter-spacing:.04em
+  }
+  .tl-node .multi{
+    font-family:var(--sans);font-weight:200;
+    font-size:clamp(28px,2.8vw,56px);
+    line-height:.95;letter-spacing:-.025em;
+    white-space:nowrap;
+    overflow:hidden;
+    min-width:0
+  }
+  .tl-node .multi .unit{
+    font-size:.36em;font-weight:300;opacity:.6;
+    margin-left:.2em;
+    vertical-align:.42em;
+    letter-spacing:0
+  }
+  .tl-node.accent .multi{color:var(--accent)}
+  .tl-node .desc{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:max(16px,.94vw);line-height:1.55;opacity:.78;
+    min-width:0
+  }
+
+  /* 横向时间线 (.timeline-h) — 与 .timeline-v 共享 axis token, 视觉语言一致 */
+  .timeline-h{
+    --tl-axis-w:8px;
+    --tl-dot:8px;
+    position:relative;
+    flex:1;
+    display:flex;align-items:center
+  }
+  .timeline-h::before{
+    content:"";position:absolute;
+    top:50%;left:5%;right:5%;height:1px;
+    transform:translateY(-50%);
+    background:repeating-linear-gradient(to right,currentColor 0 4px,transparent 4px 8px);
+    opacity:.35;pointer-events:none;z-index:0
+  }
+  .timeline-h .tl-row{
+    position:relative;width:100%;
+    display:grid;grid-template-columns:repeat(5,1fr);
+    align-items:center
+  }
+  .timeline-h .th-node{
+    position:relative;display:flex;justify-content:center
+  }
+  /* 横向 dot: 8px 纯色实心,无描边无阴影 (与 P2 保持一致) */
+  .timeline-h .th-node .dot{
+    width:var(--tl-dot);height:var(--tl-dot);
+    border-radius:50%;
+    background:var(--ink);
+    z-index:1;position:relative
+  }
+  .timeline-h .th-node.accent .dot{background:var(--accent)}
+  .timeline-h .th-node .label{
+    position:absolute;left:50%;transform:translateX(-50%);
+    width:13vw;text-align:center;
+    display:flex;flex-direction:column;gap:.4vh
+  }
+  .timeline-h .th-node.up .label{bottom:calc(50% + 22px)}
+  .timeline-h .th-node.down .label{top:calc(50% + 22px)}
+  .timeline-h .th-node .yr{
+    font-family:var(--mono);font-size:max(14px,.78vw);letter-spacing:.05em;
+    color:var(--text-helper);font-weight:500
+  }
+  .timeline-h .th-node.accent .yr{color:var(--accent)}
+  .timeline-h .th-node .name{
+    font-family:var(--sans);font-size:max(16px,1.05vw);font-weight:400;
+    color:var(--text-primary);line-height:1.2;letter-spacing:-.005em
+  }
+  .timeline-h .th-node.accent .name{color:var(--accent)}
+  .timeline-h .th-node .desc{
+    font-family:var(--sans),var(--sans-zh);font-size:max(14px,.84vw);
+    color:var(--text-secondary);font-weight:400;line-height:1.4
+  }
+
+  /* 几何图示 (参考图 5) — SVG-friendly 容器 */
+  .geo-icon{width:5vw;height:5vw;display:block;margin-bottom:2.2vh;color:var(--ink);flex-shrink:0}
+  .slide.dark .geo-icon{color:var(--paper)}
+  .geo-icon svg{width:100%;height:100%;overflow:visible}
+  .geo-icon .stroke{fill:none;stroke:currentColor;stroke-width:1.4}
+  .geo-icon .stroke-accent{fill:none;stroke:var(--accent);stroke-width:1.4}
+  .geo-icon .fill-accent{fill:var(--accent)}
+
+  /* 卡片网格 (参考图 1 卡片漂浮) — 在 canvas-card 内部再分卡 */
+  .sub-grid-3-2{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:1.4vh 1.4vw;flex:1;align-content:stretch;margin-top:3vh}
+  .sub-card{
+    background:var(--grey-1);
+    padding:2.4vh 1.6vw 2vh;
+    display:flex;flex-direction:column;
+    position:relative;border-radius:3px;
+    min-height:0
+  }
+  .slide.dark .sub-card{background:rgba(255,255,255,.06)}
+  .sub-card.accent{background:var(--accent);color:var(--accent-on)}
+  .sub-card.ink{background:var(--ink);color:var(--paper)}
+  .sub-card .nb-corner{
+    position:absolute;top:1.6vh;right:1.4vw;
+    font-family:var(--mono);font-size:max(14px,.8vw);
+    letter-spacing:.16em;opacity:.55
+  }
+  .sub-card .ttl{font-family:var(--sans),var(--sans-zh);font-weight:500;font-size:max(17px,1.5vw);line-height:1.2;letter-spacing:-.015em;margin-bottom:1vh}
+  .sub-card .desc{font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.55;opacity:.78;margin-top:auto}
+  .sub-card .lucide{width:2.4vw;height:2.4vw;stroke-width:1.4;color:currentColor;margin-bottom:1.6vh;flex-shrink:0}
+  .sub-card.accent .lucide{color:var(--accent-on)}
+
+  /* 三层架构纯色块拼图 (参考图 4 + 6) — 横排等高色块 */
+  .stack-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vw;flex:1;margin-top:6vh;align-items:stretch}
+  .stack-block{
+    display:flex;flex-direction:column;
+    padding:3.2vh 1.8vw 2.4vh;
+    position:relative;
+    min-height:0
+  }
+  .stack-block.b-accent{background:var(--accent);color:var(--accent-on)}
+  .stack-block.b-grey{background:var(--grey-1);color:var(--ink)}
+  .stack-block.b-ink{background:var(--ink);color:var(--paper)}
+  .stack-block .layer-nb{font-family:var(--mono);font-size:max(14px,.84vw);letter-spacing:.18em;opacity:.65;margin-bottom:auto}
+  .stack-block .layer-icon{margin-bottom:1.6vh}
+  .stack-block .layer-icon svg{width:3vw;height:3vw}
+  .stack-block .layer-icon .stroke{fill:none;stroke:currentColor;stroke-width:1.6}
+  .stack-block .layer-ttl{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(17px,2vw);line-height:1.1;margin-top:1vh;letter-spacing:-.02em}
+  .stack-block .layer-desc{font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(16px,.94vw);line-height:1.55;opacity:.88;margin-top:1.4vh}
+  .stack-block .lucide{width:2.6vw;height:2.6vw;stroke-width:1.4;margin-bottom:1.6vh;flex-shrink:0}
+  .stack-block .layer-tag{font-family:var(--mono);font-size:max(14px,.74vw);letter-spacing:.16em;text-transform:uppercase;opacity:.7;margin-top:1.6vh;border-top:1px solid currentColor;padding-top:1vh}
+
+  /* 不等高柱状 KPI 塔 (参考图 6) */
+  .bar-towers{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    gap:1.2vw;flex:1;align-items:end;margin-top:auto
+  }
+  .bar-tower{
+    display:flex;flex-direction:column;justify-content:flex-end;
+    min-height:0;height:100%
+  }
+  .bar-tower .cap{
+    background:var(--grey-1);
+    height:5.6vh;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:.4vh
+  }
+  .bar-tower .cap svg{width:1.6vw;height:1.6vw;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .bar-tower .body-block{
+    flex:0 1 auto;
+    padding:2vh 1.2vw 2vh;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    min-height:18vh
+  }
+  .bar-tower .body-block.h-1{min-height:22vh}
+  .bar-tower .body-block.h-2{min-height:30vh}
+  .bar-tower .body-block.h-3{min-height:38vh}
+  .bar-tower .body-block.h-4{min-height:46vh}
+  /* 默认所有 KPI 塔统一为浅描边卡 — 不抢戏;只有 .b-accent 突出为 IKB */
+  .bar-tower .body-block{background:var(--paper);color:var(--ink);border:1px solid var(--grey-2)}
+  .bar-tower .body-block.b-accent{background:var(--accent);color:var(--accent-on);border-color:var(--accent)}
+  .bar-tower .lbl{font-family:var(--mono);font-size:max(14px,.82vw);letter-spacing:.16em;text-transform:uppercase;opacity:.65;margin-bottom:1vh}
+  .bar-tower .nb{font-family:var(--sans);font-weight:250;font-size:max(20px,2.8vw);line-height:1;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .bar-tower .body-block.b-accent .nb{font-weight:300}
+  .bar-tower .nb .unit{font-size:.36em;font-weight:300;opacity:.7;margin-left:.08em;vertical-align:.4em}
+  .bar-tower .sub{font-family:var(--sans),var(--sans-zh);font-size:max(16px,.92vw);opacity:.75;margin-top:1.2vh;line-height:1.5}
+  .bar-tower .cap{background:var(--grey-1);color:var(--ink)}
+  .bar-tower .lucide{width:1.6vw;height:1.6vw;stroke-width:1.4}
+
+  /* ============ Carbon Productive Type Tokens ============
+     用于 PPT 中的"productive 时刻": 列表、表格行、说明文、章节标签
+     固定 px 字号,密集紧凑;与 vw-based 的 Expressive 巨字形成双极对比 */
+
+  /* category label / eyebrow / section tag — small, bold, uppercase */
+  .t-cat{
+    font-family:var(--mono);
+    font-size:14px;font-weight:600;
+    letter-spacing:.15em;text-transform:uppercase;
+    color:var(--text-helper);line-height:1.3
+  }
+  .t-cat.accent{color:var(--accent)}
+  .t-cat.on-dark{color:rgba(255,255,255,.78)}
+
+  /* page chrome / breadcrumb / running header — extra-small mono */
+  .t-meta{
+    font-family:var(--mono);
+    font-size:14px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;
+    color:var(--text-helper);line-height:1.45
+  }
+
+  /* helper / caption — secondary text */
+  .t-helper{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:14px;font-weight:400;
+    color:var(--text-helper);line-height:1.5;
+    letter-spacing:.005em
+  }
+
+  /* body small — list items, table rows, captions */
+  .t-body-sm{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:16px;font-weight:400;
+    color:var(--text-secondary);line-height:1.55;
+    letter-spacing:0
+  }
+
+  /* body — paragraphs, descriptions */
+  .t-body{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:18px;font-weight:400;
+    color:var(--text-primary);line-height:1.5;
+    letter-spacing:-.005em
+  }
+
+  /* body emphasis — 强调正文 */
+  .t-body-emp{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:18px;font-weight:600;       /* SemiBold per Carbon */
+    color:var(--text-primary);line-height:1.5;
+    letter-spacing:-.005em
+  }
+
+  /* productive heading — section title within slide */
+  .t-h-prod{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:22px;font-weight:600;
+    color:var(--text-primary);line-height:1.4;
+    letter-spacing:-.01em
+  }
+
+  /* dark background variants */
+  .slide.dark .t-cat,.slide.dark .t-meta,.slide.dark .t-helper{color:rgba(255,255,255,.62)}
+  .slide.dark .t-body-sm{color:rgba(255,255,255,.78)}
+  .slide.dark .t-body,.slide.dark .t-body-emp,.slide.dark .t-h-prod{color:var(--paper)}
+  .split-half .half.b-ink .t-cat,.split-half .half.b-ink .t-meta,.split-half .half.b-ink .t-helper{color:rgba(255,255,255,.62)}
+  .split-half .half.b-ink .t-body-sm{color:rgba(255,255,255,.78)}
+  .split-half .half.b-ink .t-body,.split-half .half.b-ink .t-body-emp,.split-half .half.b-ink .t-h-prod{color:var(--paper)}
+
+  /* 斜杠点阵装饰 (参考图 6 左下) */
+  .hatch{
+    background-image:repeating-linear-gradient(135deg,currentColor 0 1px,transparent 1px 8px);
+    opacity:.55
+  }
+
+  /* ========== V3: 高级点阵装饰 — 圆点 / × 号 / 圆圈 ========== */
+  /* 实心圆点矩阵 — 用于大面积装饰 */
+  .dot-mat{
+    --d:14px;
+    background-image:radial-gradient(currentColor 1.4px,transparent 1.6px);
+    background-size:var(--d) var(--d);
+    background-position:0 0;
+    opacity:.5
+  }
+  .dot-mat.lg{--d:22px}
+  .dot-mat.xl{--d:34px}
+  .dot-mat.dense{--d:9px;opacity:.62}
+
+  /* 描边圆圈矩阵 — 工业感 */
+  .ring-mat{
+    --d:18px;
+    background-image:
+      radial-gradient(circle at 50% 50%,transparent 2px,currentColor 2px,currentColor 2.6px,transparent 2.7px);
+    background-size:var(--d) var(--d);
+    opacity:.55
+  }
+  .ring-mat.lg{--d:28px}
+
+  /* × 号矩阵 — SVG mask 实现真正的 × 网格平铺 */
+  .cross-mat{
+    --d:22px;
+    background-color:currentColor;
+    -webkit-mask-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'><g stroke='black' stroke-width='1.4' stroke-linecap='round' fill='none'><line x1='8' y1='8' x2='14' y2='14'/><line x1='14' y1='8' x2='8' y2='14'/></g></svg>");
+            mask-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'><g stroke='black' stroke-width='1.4' stroke-linecap='round' fill='none'><line x1='8' y1='8' x2='14' y2='14'/><line x1='14' y1='8' x2='8' y2='14'/></g></svg>");
+    -webkit-mask-size:var(--d) var(--d);
+            mask-size:var(--d) var(--d);
+    -webkit-mask-repeat:repeat;mask-repeat:repeat;
+    opacity:.42
+  }
+  .cross-mat.lg{--d:32px}
+
+  /* ========== V3: 几何水平柱状图 ========== */
+  /* 横向柱图: 标签列 + 柱体列 + 数值列 — 严格瑞士网格 */
+  .h-bar-chart{
+    display:grid;
+    grid-template-columns:11em minmax(0,1fr) 8em;
+    gap:1.6vh 1.6vw;
+    align-items:center;
+    margin-top:2.4vh;
+    font-feature-settings:"tnum"
+  }
+  .h-bar-chart .row-lbl{
+    font-family:var(--sans),var(--sans-zh);
+    font-weight:500;
+    font-size:max(14px,1vw);
+    letter-spacing:-.005em;
+    text-align:left
+  }
+  .h-bar-chart .row-track{
+    height:3.2vh;
+    background:var(--grey-1);
+    position:relative;
+    overflow:hidden
+  }
+  .h-bar-chart .row-fill{
+    height:100%;
+    background:var(--ink);
+    transition:width 1s cubic-bezier(.5,0,.2,1)
+  }
+  .h-bar-chart .row-fill.accent{background:var(--accent)}
+  .h-bar-chart .row-fill.grey{background:var(--grey-3)}
+  .h-bar-chart .row-val{
+    font-family:var(--sans);font-weight:250;
+    font-size:max(16px,1.5vw);
+    letter-spacing:-.02em;
+    line-height:1
+  }
+  .h-bar-chart .row-val .unit{
+    font-size:.5em;opacity:.55;font-weight:300;
+    margin-left:.15em;letter-spacing:.04em
+  }
+
+  /* 垂直柱图: 用于 KPI 对比页(章节 P8) */
+  .v-bar-chart{
+    display:grid;
+    grid-template-columns:repeat(var(--cols,4),1fr);
+    align-items:end;
+    gap:1.4vw;
+    height:50vh;
+    margin-top:3vh
+  }
+  .v-bar-chart .col{display:flex;flex-direction:column;gap:1.4vh;align-items:stretch;height:100%}
+  .v-bar-chart .col-bar{
+    flex:1 1 auto;
+    background:var(--grey-1);
+    border-top:2px solid var(--ink);
+    position:relative;
+    display:flex;align-items:flex-start;justify-content:center;
+    padding-top:1vh
+  }
+  .v-bar-chart .col-bar.accent{background:var(--accent);border-top-color:var(--accent);color:var(--accent-on)}
+  .v-bar-chart .col-bar.ink{background:var(--ink);color:var(--paper);border-top-color:var(--ink)}
+  .v-bar-chart .col-bar .v{
+    font-family:var(--sans);font-weight:250;
+    font-size:max(18px,1.6vw);letter-spacing:-.02em
+  }
+  .v-bar-chart .col-lbl{
+    font-family:var(--mono);font-size:max(14px,.78vw);
+    letter-spacing:.14em;text-transform:uppercase;opacity:.6;
+    text-align:center;flex:0 0 auto
+  }
+
+  /* 对仗对比双栏 (章节 P9) */
+  .duo-compare{
+    display:grid;grid-template-columns:1fr 1px 1fr;
+    gap:0 3.4vw;
+    flex:1;align-items:stretch;margin-top:8vh
+  }
+  .duo-compare .vrule{background:var(--grey-2);width:1px;align-self:stretch}
+  .duo-compare .col{display:flex;flex-direction:column;gap:1.6vh;padding:0 .4vw}
+  .duo-compare .col-tag{
+    font-family:var(--mono);font-size:max(14px,.78vw);
+    letter-spacing:.16em;text-transform:uppercase;
+    color:var(--grey-3);
+    display:flex;align-items:center;gap:.6vw
+  }
+  .duo-compare .col-tag .num{
+    font-weight:600;color:var(--ink);
+    border:1px solid var(--ink);
+    padding:.2em .6em;font-size:.92em
+  }
+  .duo-compare .col.accent .col-tag .num{color:var(--accent);border-color:var(--accent)}
+  .duo-compare .col-ttl{
+    font-family:var(--sans),var(--sans-zh);font-weight:200;
+    font-size:3.6vw;line-height:1;letter-spacing:-.03em
+  }
+  .duo-compare .col.accent .col-ttl{color:var(--accent)}
+  .duo-compare .col-desc{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:max(16px,1.04vw);line-height:1.55;opacity:.78;
+    max-width:30vw
+  }
+  .duo-compare .col-list{
+    list-style:none;display:flex;flex-direction:column;gap:1vh;
+    margin-top:auto;padding-top:2vh;border-top:1px solid var(--grey-2)
+  }
+  .duo-compare .col-list li{
+    font-family:var(--sans),var(--sans-zh);
+    font-size:max(16px,.94vw);line-height:1.5;
+    padding-left:1.4em;position:relative
+  }
+  .duo-compare .col-list li::before{
+    content:"";position:absolute;left:0;top:.6em;
+    width:.5em;height:1px;background:currentColor;opacity:.55
+  }
+  .duo-compare .col.accent .col-list li::before{background:var(--accent);opacity:1}
+
+  /* 半屏 statement (参考图 7) */
+  .split-half{display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;align-items:stretch}
+  .split-half > .half{padding:5vh 3.4vw;display:flex;flex-direction:column;min-width:0}
+  .split-half > .half.r-border{border-left:1px solid rgba(127,127,127,.22)}
+  .split-half > .half.b-grey{background:var(--grey-1)}
+  .split-half > .half.b-accent{background:var(--accent);color:var(--accent-on)}
+  .split-half > .half.b-ink{background:var(--ink);color:var(--paper)}
+
+  /* 极简页眉 — t-meta 风格 (Carbon productive label-01) */
+  .canvas-card .chrome-min{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    font-family:var(--mono);font-size:14px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;
+    color:var(--text-helper);
+    flex:0 0 auto;
+    margin-bottom:var(--sp-9);   /* 48px */
+  }
+  .canvas-card .chrome-min.tight{margin-bottom:var(--sp-7)}   /* 32px */
+  .canvas-card .chrome-min .l, .canvas-card .chrome-min .r{
+    max-width:48vw;line-height:1.5
+  }
+  .slide.dark .canvas-card .chrome-min,.split-half .half.b-ink .canvas-card .chrome-min{color:rgba(255,255,255,.62)}
+
+  /* 响应式降级 */
+  @media (max-width:900px){
+    .h-hero{font-size:16vw}
+    .h-hero-zh{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .h-xl-zh{font-size:8vw}
+    .kpi-hero{font-size:32vw}
+    .kpi-big{font-size:16vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4,.grid-2-4-8{grid-template-columns:1fr}
+    .grid-12{grid-template-columns:repeat(6,1fr)}
+  }
+</style>
+</head>
+<body class="canvas-mode">
+<script>
+  // Windows 平台标记 — 雅黑没有 ExtraLight,需要字重补偿
+  if(/Win/i.test(navigator.platform || navigator.userAgentData?.platform || '')){
+    document.body.classList.add('is-win');
+  }
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `← → 翻页 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('swiss-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-grid" class="bg"></canvas>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     页面骨架参考 references/layouts-swiss.md
+     主题色配置参考 references/themes-swiss.md
+     ============================================================ -->
+<section class="slide accent" data-layout="SWISS-COVER-ASCII" data-animate="hero">
+<div class="canvas-card">
+<canvas class="ascii-bg" aria-hidden="true"></canvas>
+<div class="chrome-min"><div class="l">未医智源 · 商业计划书</div><div class="r">SWISS · IKB · 01 / {TOTAL}</div></div>
+<div style="flex:1;padding:0;display:grid;grid-template-rows:auto 1fr auto;gap:2.6vh">
+  <div data-anim="kicker" class="t-meta" style="color:rgba(255,255,255,.78);letter-spacing:.22em">WEIYI ZHIYUAN · ACTIVE HEALTH AGENT</div>
+  <h1 data-anim="title" style="align-self:center;font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(11.6vw,19vh);line-height:.94;letter-spacing:-.025em;color:#fff">自进化<br>主动<span style="font-style:italic;font-weight:300">健康</span>智能体</h1>
+  <div data-anim="bottom" style="display:grid;grid-template-rows:auto auto;gap:1.6vh;border-top:1px solid rgba(255,255,255,.22);padding-top:2vh">
+    <div data-anim="lead" class="lead" style="max-width:54ch;color:rgba(255,255,255,.86);font-weight:300">为国内三甲医院打造自进化主动健康智能体，以预防为导向，覆盖慢病管理、海外来华就医，实现医生效率、用户疗效与依从性双翻倍。</div>
+    <div style="display:flex;justify-content:space-between;align-items:end">
+      <div class="t-meta" style="color:rgba(255,255,255,.6)">商业计划书 · 2026</div>
+      <div class="t-meta" style="color:rgba(255,255,255,.6)">→ swipe / arrow keys</div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S03" data-animate="statement" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">01 · 项目定位 / POSITIONING</div><div class="r">02 / 17</div></div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:3vh">
+  <div class="kicker accent" data-anim="k">项目定位</div>
+  <h1 data-anim="s1" style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(5.8vw,10.2vh);line-height:1.06;letter-spacing:-.025em;color:var(--text-primary);max-width:20ch">我们帮三甲医院，打造<span style="font-style:italic">自进化</span>主动健康智能体</h1>
+  <p class="lead" data-anim="s2" style="max-width:48ch">以预防为导向，提供主动健康服务、个性化慢病管理与海外来华就医，让医生管理效率、用户疗效与依从性<span class="mark">双翻倍</span>。</p>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S05" data-animate="three-forces" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">02 · 市场机遇 / WHY NOW</div><div class="r">03 / 17</div></div>
+<div class="kicker accent" data-anim="k">为什么是现在</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">政策、市场、技术三重窗口同时打开</h2>
+<div class="grid-3" style="flex:1;align-content:start;margin-top:2.4vh"><article class="sub-card" data-anim="c1">
+        <span class="nb-corner">01</span>
+        <i data-lucide="landmark" class="lucide"></i>
+        <h3 class="ttl">政策驱动</h3>
+        <p class="desc">健康中国 2030 与「十五五」规划将慢病连续服务上升为国家战略；单病种 2024–2030 专项方案、科技重大专项重点支持慢病数字化转型，科室管理率纳入绩效考核。</p>
+      </article><article class="sub-card" data-anim="c2">
+        <span class="nb-corner">02</span>
+        <i data-lucide="trending-up" class="lucide"></i>
+        <h3 class="ttl">市场爆发</h3>
+        <p class="desc">全国慢病患者超 4 亿、管理人群 5–6 亿；体重管理市场 3260 亿元、GLP-1 国内 230–450 亿元，千亿级缺口待填补，院外自费服务快速爆发。</p>
+      </article><article class="sub-card" data-anim="c3">
+        <span class="nb-corner">03</span>
+        <i data-lucide="cpu" class="lucide"></i>
+        <h3 class="ttl">技术窗口</h3>
+        <p class="desc">82% 医疗机构已在生产环境部署 AI；长时程 Agent 刚好支撑主动干预与多轮记忆。再晚 1–2 年基础大模型将内置慢病能力，当前是最佳切入期。</p>
+      </article>
+</div>
+</div>
+</section>
+<section class="slide dark" data-layout="S06" data-animate="measure-up" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">03 · 市场规模 / MARKET</div><div class="r">04 / 17</div></div>
+<div class="kicker accent" data-anim="k">个性化慢病管理 · 千亿级缺口</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">市场爆发：慢病管理供需严重错配</h2>
+<div class="bar-towers"><div class="bar-tower" data-anim="b1">
+        <div class="cap"><i data-lucide="users"></i></div>
+        <div class="body-block h-2">
+          <div class="lbl">慢病患者基数</div>
+          <div class="nb">4<span class="unit">亿+</span></div>
+          <div class="sub">管理人群 5–6 亿，约每 2 人 1 人需管理</div>
+        </div>
+      </div><div class="bar-tower" data-anim="b2">
+        <div class="cap"><i data-lucide="scale"></i></div>
+        <div class="body-block h-3">
+          <div class="lbl">体重管理市场</div>
+          <div class="nb">3260<span class="unit">亿元</span></div>
+          <div class="sub">2025 年，同比增长 15.8%</div>
+        </div>
+      </div><div class="bar-tower" data-anim="b3">
+        <div class="cap"><i data-lucide="pill"></i></div>
+        <div class="body-block h-3 b-accent">
+          <div class="lbl">GLP-1 国内</div>
+          <div class="nb">230–450<span class="unit">亿元</span></div>
+          <div class="sub">2026 年规模，2030 年突破千亿</div>
+        </div>
+      </div><div class="bar-tower" data-anim="b4">
+        <div class="cap"><i data-lucide="alert-triangle"></i></div>
+        <div class="body-block h-4">
+          <div class="lbl">超重肥胖负担</div>
+          <div class="nb">1<span class="unit">万亿元</span></div>
+          <div class="sub">年度经济负担，2030 肥胖人数达 5.15 亿</div>
+        </div>
+      </div>
+</div>
+<div class="meta-row" data-anim="note" style="margin-top:3vh">
+  <span>超重肥胖率 41%（2025）</span><span class="dot"></span>
+  <span>2030 肥胖人数达 5.15 亿</span><span class="dot"></span>
+  <span>GLP-1 用药依从性不足 0.5%</span>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S07" data-animate="bar-grow" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">04 · 海外来华就医 / OVERSEAS</div><div class="r">05 / 17</div></div>
+<div class="kicker accent" data-anim="k">以美国为例 · 高端客源</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">客源高速增长，结构高度集中</h2>
+<div class="h-bar-chart"><div class="row-lbl">国际患者总量</div>
+      <div class="row-track"><div class="row-fill" style="width:100%"></div></div>
+      <div class="row-val">128<span class="unit">万人次</span></div><div class="row-lbl">专程赴华就医</div>
+      <div class="row-track"><div class="row-fill" style="width:32%"></div></div>
+      <div class="row-val">41.3<span class="unit">万人次</span></div><div class="row-lbl">美国客源 2025</div>
+      <div class="row-track"><div class="row-fill accent" style="width:12%"></div></div>
+      <div class="row-val">15<span class="unit">万人次</span></div><div class="row-lbl">美国客源 2023</div>
+      <div class="row-track"><div class="row-fill" style="width:4%"></div></div>
+      <div class="row-val">5<span class="unit">万人次</span></div>
+</div>
+<div class="meta-row" data-anim="note" style="margin-top:3vh">
+  <span>整体 +73.6%</span><span class="dot"></span>
+  <span>专程赴华 +63%</span><span class="dot"></span>
+  <span>美国客源两年 +200%</span><span class="dot"></span>
+  <span>美国占协和外籍 22.1%</span><span class="dot"></span>
+  <span>收入 89.7 亿美元 ≈ 640 亿元</span><span class="dot"></span>
+  <span>四大慢病占 70%+</span>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S08" data-animate="duo-mirror" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">02 · 市场机遇 / WHY NOW</div><div class="r">06 / 17</div></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:1.8vh;min-height:0">
+  <div class="kicker accent" data-anim="k">技术窗口 · 为什么是现在</div>
+  <h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">Agent 成熟的最佳切入期</h2>
+  <div style="height:1px;background:var(--ink)"></div>
+  <div style="display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:3.4vw;align-items:start;flex:1;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:1.6vh"><div style="display:grid;grid-template-columns:auto 1fr;gap:1.2vw;align-items:start">
+      <div class="t-meta" style="color:var(--accent);font-weight:500;padding-top:.2vh">01</div>
+      <p class="body-sm" style="margin:0"><b>82% 已落地生产环境</b> — NVIDIA Healthcare Survey 2026：82% 医疗机构已在生产环境部署 AI（非 Pilot），临床对 AI 的接纳已成主流。</p>
+    </div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:1.2vw;align-items:start">
+      <div class="t-meta" style="color:var(--accent);font-weight:500;padding-top:.2vh">02</div>
+      <p class="body-sm" style="margin:0"><b>长时程 Agent 就位</b> — 主动干预、多轮记忆、个性化闭环管理技术成熟，刚好支撑慢病全流程主动服务交付。</p>
+    </div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:1.2vw;align-items:start">
+      <div class="t-meta" style="color:var(--accent);font-weight:500;padding-top:.2vh">03</div>
+      <p class="body-sm" style="margin:0"><b>对手停在工具阶段</b> — 国内 AI 医疗多停留「本地化大模型 + 科室知识库」问答工具，无成熟 Agent 工程化，项目大量烂尾。</p>
+    </div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:1.2vw;align-items:start">
+      <div class="t-meta" style="color:var(--accent);font-weight:500;padding-top:.2vh">04</div>
+      <p class="body-sm" style="margin:0"><b>窗口仅 1–2 年</b> — 基础大模型厂商将把慢病管理内置为原生功能，纯工具被直接替代——当前是服务型产品最佳切入期。</p>
+    </div>
+    </div>
+    <figure class="tile" style="margin:0;display:flex;flex-direction:column;gap:1vh;min-width:0">
+      <div class="frame-img fit-contain" style="aspect-ratio:1216/622;max-height:60vh;background:var(--grey-1)">
+        <img src="images/ai-usage-matrix.png" data-image-slot="s22-hero-21x9" alt="丁香园 AI 用例认知矩阵（n=4150）">
+      </div>
+      <figcaption class="img-cap" style="color:var(--ink)">丁香园 AI 用例认知矩阵 · 调研样本 n=4,150</figcaption>
+    </figure>
+  </div>
+</div>
+</div>
+</section>
+<section class="slide dark" data-layout="S03" data-animate="statement" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">05 · 产品理念 / PHILOSOPHY</div><div class="r">07 / 17</div></div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:3vh">
+  <div class="kicker accent" data-anim="k">我们卖结果，不卖工具</div>
+  <h1 data-anim="s1" style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(6.4vw,11.2vh);line-height:1.04;letter-spacing:-.03em;color:var(--paper);max-width:18ch">从「记录工具」到「<span style="font-style:italic">主动交付</span>服务」</h1>
+  <p class="lead" data-anim="s2" style="max-width:46ch;color:rgba(255,255,255,.82)">智能体完成主体工作，医生仅做决策兜底。商业模式与医院管理效果深度绑定，而非软件授权费。</p>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S11" data-animate="timeline-walk" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">06 · 核心服务流程 / PIPELINE</div><div class="r">08 / 17</div></div>
+<div class="kicker accent" data-anim="k">从入组到增收的全流程主动交付</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">患者分层 → 主动管理 → 科室增收</h2>
+<div class="timeline-h">
+      <div class="tl-row" style="grid-template-columns:repeat(7,1fr)"><div class="th-node up" data-anim="n1"><span class="dot"></span><div class="label"><span class="yr">STEP 01</span><span class="name">患者分层入组</span><span class="desc">拉取 HIS 病历自动分型</span></div></div><div class="th-node down" data-anim="n2"><span class="dot"></span><div class="label"><span class="yr">STEP 02</span><span class="name">生成初评报告</span><span class="desc">医生仅确认分层结果</span></div></div><div class="th-node up" data-anim="n3"><span class="dot"></span><div class="label"><span class="yr">STEP 03</span><span class="name">voice agent</span><span class="desc">诊中记录与随访规划</span></div></div><div class="th-node down" data-anim="n4"><span class="dot"></span><div class="label"><span class="yr">STEP 04</span><span class="name">主动干预推送</span><span class="desc">饮食运动用药提醒</span></div></div><div class="th-node up" data-anim="n5"><span class="dot"></span><div class="label"><span class="yr">STEP 05</span><span class="name">医生调策略</span><span class="desc">自然语言个体实验</span></div></div><div class="th-node down" data-anim="n6"><span class="dot"></span><div class="label"><span class="yr">STEP 06</span><span class="name">定期 Review</span><span class="desc">严重事件人工兜底</span></div></div><div class="th-node up" data-anim="n7"><span class="dot"></span><div class="label"><span class="yr">STEP 07</span><span class="name">增收五五分成</span><span class="desc">绑定科室结果</span></div></div>
+      </div>
+    </div>
+</div>
+</section>
+<section class="slide dark" data-layout="S04" data-animate="grid-reveal" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">07 · 核心价值 / VALUE</div><div class="r">09 / 17</div></div>
+<div class="kicker accent" data-anim="k">卖结果，不卖工具</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">医生、患者、医院三方共赢</h2>
+<div class="sub-grid-3-2"><article class="sub-card" data-anim="c1">
+        <span class="nb-corner">01</span>
+        <h3 class="ttl">管理效率 5×</h3>
+        <p class="desc">单医生管理患者从 20 人提升至 100 人，从事务中解放，聚焦核心决策。</p>
+      </article><article class="sub-card" data-anim="c2">
+        <span class="nb-corner">02</span>
+        <h3 class="ttl">依从性翻倍</h3>
+        <p class="desc">疗效、满意度与用药依从性翻倍，年管理服务价值 200 → 2000–3000 元。</p>
+      </article><article class="sub-card" data-anim="c3">
+        <span class="nb-corner">03</span>
+        <h3 class="ttl">管理率 20–25%</h3>
+        <p class="desc">科室慢病管理率从不足 4% 提升至 20–25%，满足绩效考核要求。</p>
+      </article><article class="sub-card" data-anim="c4">
+        <span class="nb-corner">04</span>
+        <h3 class="ttl">耗时 15× 下降</h3>
+        <p class="desc">单患者管理耗时从 30 分钟压缩至 2 分钟，效率提升 15 倍。</p>
+      </article><article class="sub-card" data-anim="c5">
+        <span class="nb-corner">05</span>
+        <h3 class="ttl">单科室年增收</h3>
+        <p class="desc">标杆合同单科室年增收约 200 万元，与医院利益深度绑定。</p>
+      </article><article class="sub-card" data-anim="c6">
+        <span class="nb-corner">06</span>
+        <h3 class="ttl">全周期闭环</h3>
+        <p class="desc">主动干预 + 多轮记忆 + 个性化闭环，而非一次性问答工具。</p>
+      </article>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S08" data-animate="duo-mirror" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">08 · 效率对比 / VS</div><div class="r">10 / 17</div></div>
+<div class="duo-compare">
+      <div class="col" data-anim="l">
+        <div class="col-tag"><span class="num">A</span> 传统医疗人力</div>
+        <div class="col-ttl">交付靠人</div>
+        <ul class="col-list"><li>单医生仅管理 20 名慢病患者</li><li>单患者管理耗时 30 分钟</li><li>科室慢病管理率不足 4%</li><li>年管理服务价值约 200 元</li></ul>
+      </div>
+      <span class="vrule"></span>
+      <div class="col accent" data-anim="r">
+        <div class="col-tag"><span class="num">B</span> 未医智源智能体</div>
+        <div class="col-ttl">交付靠 Agent</div>
+        <ul class="col-list"><li>单医生管理 100 名患者（5×）</li><li>单患者耗时 2 分钟（15×）</li><li>管理率提升至 20–25%</li><li>年价值 2000–3000 元（10×+）</li></ul>
+      </div>
+    </div>
+</div>
+</section>
+<section class="slide dark" data-layout="S05" data-animate="three-forces" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">09 · 核心壁垒 / MOAT</div><div class="r">11 / 17</div></div>
+<div class="kicker accent" data-anim="k">为什么只有我们能做成</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">数据、技术、团队三重护城河</h2>
+<div class="grid-3" style="flex:1;align-content:start;margin-top:2.4vh"><article class="sub-card" data-anim="c1">
+        <span class="nb-corner">01</span>
+        <i data-lucide="database" class="lucide"></i>
+        <h3 class="ttl">临床数据壁垒</h3>
+        <p class="desc">背靠国家科技重大专项，拥有顶级三甲前瞻性科研队列；慢病分型与风险模型基于真实世界临床数据训练，效果经过临床验证。</p>
+      </article><article class="sub-card" data-anim="c2">
+        <span class="nb-corner">02</span>
+        <i data-lucide="git-branch" class="lucide"></i>
+        <h3 class="ttl">技术代差壁垒</h3>
+        <p class="desc">自进化智能体：安全边界与共享知识独立于情景学习，主动式管理真正替代人力，参考 Palantir Ontology 打造医疗决策与工作流交付体系。</p>
+      </article><article class="sub-card" data-anim="c3">
+        <span class="nb-corner">03</span>
+        <i data-lucide="users" class="lucide"></i>
+        <h3 class="ttl">团队壁垒</h3>
+        <p class="desc">临床 + 科研 + AI + 投资复合团队，少有能同时看懂临床需求、落地 AI 技术、跑通商业模式的组合。</p>
+      </article>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S02" data-animate="timeline-walk" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">10 · 发展规划 / ROADMAP</div><div class="r">12 / 17</div></div>
+<div class="kicker accent" data-anim="k">一年破千万，三年破亿，长期建基座</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">清晰可验证的增长路径</h2>
+<div class="timeline-v"><div class="tl-node accent" data-anim="n1">
+        <span class="dot"></span>
+        <span class="yr">2026</span>
+        <span class="multi">1000<span class="unit">万元</span></span>
+        <p class="desc">短期（1 年）：落地 10–20 家头部三级医院，管理 1 万慢病患者、服务 100 名海外来华就医，年营收破千万。</p>
+      </div><div class="tl-node " data-anim="n2">
+        <span class="dot"></span>
+        <span class="yr">2029</span>
+        <span class="multi">1<span class="unit">亿元 ARR</span></span>
+        <p class="desc">中期（3 年）：拓展 300 家各级医院，管理 20 万慢病患者，累计服务超 1000 人来华就医。</p>
+      </div><div class="tl-node " data-anim="n3">
+        <span class="dot"></span>
+        <span class="yr">长期</span>
+        <span class="multi">3<span class="unit">大愿景</span></span>
+        <p class="desc">科研智能体基座、循证健康品牌塑造、长程 agentic 数据飞轮，面向真实世界持续学习。</p>
+      </div>
+</div>
+</div>
+</section>
+<section class="slide dark" data-layout="S08" data-animate="duo-mirror" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">11 · 竞争格局 / LANDSCAPE</div><div class="r">13 / 17</div></div>
+<div class="duo-compare">
+      <div class="col" data-anim="l">
+        <div class="col-tag"><span class="num">A</span> 行业普遍做法</div>
+        <div class="col-ttl">问答 / 工具</div>
+        <ul class="col-list"><li>传统医疗信息化厂商：院内流程工具，按软件授权收费</li><li>消费级健康 APP：无临床背书，不接入医院体系</li><li>通用 AI 医疗助手：被动问答，不覆盖全周期</li><li>垂直慢病 SaaS：依赖人工运营，按席位收费</li></ul>
+      </div>
+      <span class="vrule"></span>
+      <div class="col accent" data-anim="r">
+        <div class="col-tag"><span class="num">B</span> 未医智源</div>
+        <div class="col-ttl">主动 Agent</div>
+        <ul class="col-list"><li>从「记录工具」升级为「主动交付服务」</li><li>国家级课题 + 三甲背书，临床级慢病管理</li><li>长时程主动 Agent，覆盖完整病程</li><li>Agent 驱动，按效果分成而非按席位</li></ul>
+      </div>
+    </div>
+</div>
+</section>
+<section class="slide" data-layout="S05" data-animate="three-forces" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">12 · 创始团队 / TEAM</div><div class="r">14 / 17</div></div>
+<div class="kicker accent" data-anim="k">临床 + 科研 + AI + 投资</div>
+<h2 class="h-xl-zh" data-anim="t" style="margin-bottom:1vh">少有的复合基因团队</h2>
+<div class="grid-3" style="flex:1;align-content:start;margin-top:2.4vh"><article class="sub-card" data-anim="c1">
+        <span class="nb-corner">01</span>
+        <i data-lucide="user-round" class="lucide"></i>
+        <h3 class="ttl">Charles · 董事长</h3>
+        <p class="desc">复旦临床医学，顶级三甲放射外科背景；博士方向医学影像 AI，承担十三五重点研发，ECR 口头报告、SCI 论文 5 篇；6 年美元/双币基金投资经历。扮演 Echo：产品定义与商业拓展。</p>
+      </article><article class="sub-card" data-anim="c2">
+        <span class="nb-corner">02</span>
+        <i data-lucide="graduation-cap" class="lucide"></i>
+        <h3 class="ttl">Yuantong · CEO</h3>
+        <p class="desc">复旦上海医学院预防医学本科，哈佛公卫硕士，BMJ 第一作者；深耕预防医学与慢病队列研究，负责科研体系、数据队列与公共卫生业务。扮演 Delta。</p>
+      </article><article class="sub-card" data-anim="c3">
+        <span class="nb-corner">03</span>
+        <i data-lucide="cpu" class="lucide"></i>
+        <h3 class="ttl">Hongchen · 技术顾问</h3>
+        <p class="desc">复旦青年教授，博士先后任职微软亚研、千问团队，深耕 Agent 工程化；负责智能体技术架构、ontology 搭建与硬件生态。98 年出生的年轻技术学者。</p>
+      </article>
+</div>
+</div>
+</section>
+<section class="slide" data-layout="S08" data-animate="duo-mirror" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">13 · 商业模式 / MODEL</div><div class="r">15 / 17</div></div>
+<div class="duo-compare">
+      <div class="col" data-anim="l">
+        <div class="col-tag"><span class="num">A</span> 传统软件授权</div>
+        <div class="col-ttl">卖工具</div>
+        <ul class="col-list"><li>一次性软件授权费</li><li>按席位 / 模块收费</li><li>不绑定管理效果</li><li>项目易烂尾，难投入临床</li></ul>
+      </div>
+      <span class="vrule"></span>
+      <div class="col accent" data-anim="r">
+        <div class="col-tag"><span class="num">B</span> 结果绑定收费</div>
+        <div class="col-ttl">卖结果</div>
+        <ul class="col-list"><li>一次性部署费 100 万元（标杆）</li><li>智能体年服务费 20 万元 / 年</li><li>科室增收五五分成（标杆年分成 100 万）</li><li>2026 Q3 上海头部三甲首合同启动</li></ul>
+      </div>
+    </div>
+</div>
+</section>
+<section class="slide dark" data-layout="S03" data-animate="statement" >
+<div class="canvas-card">
+<div class="chrome-min"><div class="l">14 · 长期愿景 / VISION</div><div class="r">16 / 17</div></div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:3vh">
+  <div class="kicker accent" data-anim="k">面向真实世界持续学习</div>
+  <h1 data-anim="s1" style="font-family:var(--sans),var(--sans-zh);font-weight:200;font-size:min(6.4vw,11.2vh);line-height:1.04;letter-spacing:-.03em;color:var(--paper);max-width:18ch">让主动健康 Agent，<span style="font-style:italic">不断</span>从环境中学</h1>
+  <p class="lead" data-anim="s2" style="max-width:46ch;color:rgba(255,255,255,.82)">通过长程 agentic 行动力数据飞轮，接受医患双方评分与改进线索，打造面向真实世界环境学习的超长时程评测集。</p>
+</div>
+</div>
+</section>
+<section class="slide split" data-layout="SWISS-CLOSING-ASCII" data-animate="split-statement">
+<div class="canvas-card">
+<div class="split-half">
+      <div class="half b-accent" style="padding:5.6vh 3.6vw 4.4vh;justify-content:space-between;position:relative;overflow:hidden">
+        <canvas class="ascii-bg" aria-hidden="true"></canvas>
+        <div class="chrome-min" style="margin-bottom:0;position:relative;z-index:1">
+          <div class="l">17 / 17</div>
+          <div class="r">CLOSING</div>
+        </div>
+        <div data-anim="manifesto" style="display:flex;flex-direction:column;gap:2vh;position:relative;z-index:1">
+          <div class="t-meta" style="color:rgba(255,255,255,.78);letter-spacing:.22em;margin-bottom:1.6vh">MANIFESTO</div>
+          <h2 style="font-family:var(--sans),var(--sans-zh);font-size:min(8vw,14vh);line-height:.94;letter-spacing:-.025em;font-weight:200;color:#fff">临床级。<br/>Agent 驱动。<br/><span style="font-style:italic;font-weight:300">按结果</span>收费。</h2>
+          <div style="font-family:var(--sans),var(--sans-zh);font-size:max(14px,1vw);line-height:1.6;color:rgba(255,255,255,.82);font-weight:300;max-width:36ch;margin-top:1.4vh">我们帮三甲医院把慢病管理做成可衡量、可复制、可自进化的主动健康服务。</div>
+        </div>
+        <div data-anim="signature" style="display:flex;justify-content:space-between;align-items:end;border-top:1px solid rgba(255,255,255,.22);padding-top:2vh;position:relative;z-index:1">
+          <div class="t-meta" style="color:rgba(255,255,255,.62)">未医智源 · 商业计划书</div>
+          <div class="t-meta" style="color:rgba(255,255,255,.62)">2026</div>
+        </div>
+      </div>
+      <div class="half" style="padding:5.6vh 3.6vw 4.4vh;justify-content:space-between">
+        <div class="chrome-min"><div class="l">TAKEAWAYS</div><div class="r">03 RULES</div></div>
+        <div data-anim="rules" style="display:flex;flex-direction:column;gap:0"><div style="display:grid;grid-template-columns:auto 1fr;gap:2vw;align-items:start;padding:2.6vh 0;border-top:1px solid var(--border-subtle)">
+          <div style="font-family:var(--sans);font-weight:200;font-size:min(4.4vw,7.8vh);line-height:.9;">01</div>
+          <div>
+            <h3 style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(18px,1.8vw);line-height:1.2;letter-spacing:-.015em;">临床级壁垒</h3>
+            <p style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.6;color:var(--text-secondary);font-weight:400">国家课题 + 三甲前瞻性队列，真实世界数据训练，效果经临床验证。</p>
+          </div>
+        </div><div style="display:grid;grid-template-columns:auto 1fr;gap:2vw;align-items:start;padding:2.6vh 0;border-top:1px solid var(--border-subtle)">
+          <div style="font-family:var(--sans);font-weight:200;font-size:min(4.4vw,7.8vh);line-height:.9;">02</div>
+          <div>
+            <h3 style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(18px,1.8vw);line-height:1.2;letter-spacing:-.015em;">长时程主动 Agent</h3>
+            <p style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.6;color:var(--text-secondary);font-weight:400">自进化智能体主动交付服务，替代人力而非被动问答工具。</p>
+          </div>
+        </div><div style="display:grid;grid-template-columns:auto 1fr;gap:2vw;align-items:start;padding:2.6vh 0;border-top:1px solid var(--border-subtle) border-bottom:2px solid var(--accent)">
+          <div style="font-family:var(--sans);font-weight:200;font-size:min(4.4vw,7.8vh);line-height:.9; color:var(--accent)">03</div>
+          <div>
+            <h3 style="font-family:var(--sans),var(--sans-zh);font-weight:400;font-size:max(18px,1.8vw);line-height:1.2;letter-spacing:-.015em; color:var(--accent)">按结果收费</h3>
+            <p style="font-family:var(--sans),var(--sans-zh);font-size:max(16px,.94vw);line-height:1.6;color:var(--text-secondary);font-weight:400">部署费 + 年服务费 + 五五分成，与医院管理效果深度绑定。</p>
+          </div>
+        </div>
+        </div>
+        <div class="t-meta" style="color:var(--text-helper);text-align:right">→ 完 · END OF FIELD NOTE</div>
+      </div>
+    </div>
+</div>
+</section>
+</div>
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 网格背景 (瑞士风专用) ===============
+   极简移动网格 + 微弱点阵叠加,营造"工业感、精准感"
+   - 主网格: 缓慢漂移的细线网格
+   - 次级: 鼠标附近的极细点阵微扰
+   - 颜色: 跟随主题(浅底深线 / 深底亮线),配合 mix-blend-mode
+*/
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS = `precision highp float;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform vec2 u_mouse;
+uniform float u_dark; // 0 = light, 1 = dark
+uniform vec3 u_accent;
+
+float gridLine(vec2 uv, float spacing, float thickness){
+  vec2 g = abs(fract(uv / spacing) - 0.5);
+  float d = min(g.x, g.y);
+  return 1.0 - smoothstep(thickness - 0.005, thickness + 0.005, d);
+}
+
+float dot2(vec2 p){ return dot(p,p); }
+
+void main(){
+  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+  float aspect = u_resolution.x / u_resolution.y;
+  vec2 p = uv;
+  p.x *= aspect;
+
+  // 缓慢平移
+  vec2 drift = vec2(u_time * 0.008, u_time * 0.005);
+  vec2 gp = p + drift;
+
+  // 主细网格 (大间距)
+  float mainGrid = gridLine(gp, 0.12, 0.012);
+  // 次级网格 (更细更密)
+  float subGrid = gridLine(gp, 0.024, 0.04) * 0.4;
+
+  // 鼠标附近的强化
+  vec2 m = u_mouse;
+  m.x *= aspect;
+  float md = length(p - m);
+  float mInfluence = exp(-md * 4.0) * 0.5;
+
+  float gridStrength = (mainGrid + subGrid * 0.5) * (0.45 + mInfluence);
+
+  // 点阵 (作为基底)
+  vec2 dotGrid = fract(gp * 50.0) - 0.5;
+  float dotMask = 1.0 - smoothstep(0.05, 0.14, length(dotGrid));
+  // 用低频噪声调制点阵密度
+  float wave = sin(gp.x * 1.4 + u_time * 0.15) * cos(gp.y * 1.6 - u_time * 0.12);
+  dotMask *= smoothstep(-0.3, 0.6, wave) * 0.6;
+
+  // 颜色: 浅底用深线条,深底用浅线条;高亮处带 accent 痕迹
+  vec3 lineColor = mix(vec3(0.08), vec3(0.92), u_dark);
+  vec3 bgColor = mix(vec3(0.97, 0.97, 0.96), vec3(0.06, 0.06, 0.07), u_dark);
+
+  // accent 暗示 (鼠标附近偷渡一点 accent 色)
+  vec3 col = bgColor;
+  col = mix(col, lineColor, gridStrength * 0.55);
+  col = mix(col, lineColor, dotMask * 0.35);
+  col = mix(col, u_accent, mInfluence * 0.18);
+
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=1-e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const lD=gl.getUniformLocation(prog,'u_dark');
+  const lA=gl.getUniformLocation(prog,'u_accent');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+
+  // 读取 CSS 变量,把 accent 颜色塞进 shader
+  function readAccent(){
+    const cs = getComputedStyle(document.documentElement);
+    const hex = cs.getPropertyValue('--accent').trim() || '#002FA7';
+    const m = hex.match(/^#([0-9a-f]{6})$/i);
+    if(!m) return [0, 0.18, 0.65];
+    const n = parseInt(m[1], 16);
+    return [((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255];
+  }
+  let accent = readAccent();
+  let dark = 0;
+
+  return (tSec, isDark)=>{
+    if(isDark !== undefined) dark = isDark ? 1 : 0;
+    accent = readAccent();
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,mouse.y);
+    gl.uniform1f(lD,dark);
+    gl.uniform3f(lA,accent[0],accent[1],accent[2]);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+// canvas-mode / low-power: skip WebGL draw loop (no active RAF loop)
+let darkMode=false;
+let gridCtrl=null, gridRAF=0, gridT0=Date.now();
+function startGrid(){
+  if(document.body.classList.contains('canvas-mode') || window.__lowPowerMode || gridRAF) return;
+  if(!gridCtrl) gridCtrl = bootGL('bg-grid',FS);
+  if(!gridCtrl) return;
+  gridT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){gridRAF=0;return;}
+    const t=(Date.now()-gridT0)/1000;
+    gridCtrl(t, darkMode);
+    gridRAF=requestAnimationFrame(loop);
+  }
+  gridRAF=requestAnimationFrame(loop);
+}
+function stopGrid(){
+  if(gridRAF) cancelAnimationFrame(gridRAF);
+  gridRAF=0;
+}
+if(document.body.classList.contains('canvas-mode')){
+  const c=document.getElementById('bg-grid');
+  if(c) c.remove();
+}else{
+  startGrid();
+}
+addEventListener('swiss-low-power-change', e=>{e.detail.on ? stopGrid() : startGrid();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const isDark = el.classList.contains('dark') || el.classList.contains('accent');
+  document.body.classList.toggle('dark-bg', isDark);
+  darkMode = isDark;
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(250,250,248,.96);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;overflow:hidden;border:2px solid '+(i===idx?'var(--accent)':'rgba(0,0,0,.12)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(0,0,0,.4)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'var(--accent)':'rgba(0,0,0,.12)';
+    const wrap=document.createElement('div');
+    const isDark = s.classList.contains('dark') || s.classList.contains('accent');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(isDark?'var(--ink)':'var(--paper)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    /* ESC 索引卡 label */
+  label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const initialSlideParam = new URLSearchParams(location.search).get('slide');
+const initialSlide = initialSlideParam ? Number(initialSlideParam) - 1 : 0;
+go(Number.isFinite(initialSlide) ? initialSlide : 0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- Motion One 动效引擎 (与原模板一致) -->
+<script type="module">
+let motion;
+try {
+  motion = await import('./assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+    document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1');
+  }
+}
+
+if(motion){
+  const { animate } = motion;
+  document.body.classList.add('motion-ready');
+
+  /* ============================================================
+     IBM Carbon Motion · 每个 recipe 服务一种表达
+     不是一刀切的 stagger,而是把动效绑在内容语义上
+     ============================================================ */
+  const EASE_PROD       = [.2, 0, .38, .9];
+  const EASE_ENTRY_EXP  = [0, 0, .3, 1];
+
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+    /* 同时复位需要被 recipe 接管的元素 */
+    slide.querySelectorAll('.row-fill,.tl-node,.stack-block,.bar-tower,.sub-card,.col,.vrule,.kpi-cell')
+      .forEach(el=>{el.style.cssText = el.dataset._origCss || el.style.cssText;});
+  }
+
+  /* ---------- 通用工具 ---------- */
+  const fade = (el, opts={})=>animate(el,
+    {opacity:[0,1], y:[opts.y ?? 12, 0]},
+    {duration:opts.duration ?? .6, delay:opts.delay ?? 0,
+     easing:opts.easing ?? EASE_ENTRY_EXP});
+
+  /* ---------- recipe: hero · 封面索引 ----------
+     大编号一个个亮起 → 索引行最后落定 */
+  function rHero(slide, all){
+    const numRows = [...slide.querySelectorAll('.cover-row')];
+    const rest = all.filter(el=>!numRows.length || el !== numRows[0]);
+    /* 先入: chrome 240ms */
+    const chrome = slide.querySelector('.chrome-min');
+    if(chrome) animate(chrome, {opacity:[0,1]}, {duration:.24, easing:EASE_PROD});
+    /* 大编号 01/02/03 像点名一样依次亮 */
+    numRows.forEach((row, i)=>{
+      animate(row, {opacity:[0,1], x:[-12,0]},
+        {duration:.5, delay:.15 + i*.18, easing:EASE_ENTRY_EXP});
+    });
+    /* 索引底栏最后慢慢落定 */
+    const idx = slide.querySelector('[data-anim="line"]');
+    if(idx) fade(idx, {delay:.15 + numRows.length*.18 + .1, duration:.5, y:6});
+  }
+
+  /* ---------- recipe: progression · 1× → 10× → 1000× ----------
+     节点依次入场,每个节点的数字单独"递进生长"营造跃迁 */
+  function rProgression(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.6, y:10});
+
+    const nodes = [...slide.querySelectorAll('.tl-node')];
+    nodes.forEach((node, i)=>{
+      const base = .35 + i*.32;          /* 节点之间间隔大,营造时间感 */
+      /* 整个节点先轻微浮入 */
+      animate(node, {opacity:[0,1], y:[14, 0]},
+        {duration:.55, delay:base, easing:EASE_ENTRY_EXP});
+      /* 再让 multi(数字)从 .85 scale 弹到 1,延迟 100ms */
+      const multi = node.querySelector('.multi');
+      if(multi) animate(multi, {scale:[.92, 1], opacity:[0,1]},
+        {duration:.5, delay:base + .12, easing:EASE_ENTRY_EXP});
+    });
+
+    /* 底部 KPI 4 列最后落定,内部 60ms stagger */
+    const kpis = [...slide.querySelectorAll('.kpi-cell')];
+    kpis.forEach((cell, i)=>{
+      animate(cell, {opacity:[0,1], y:[8, 0]},
+        {duration:.4, delay:1.4 + i*.07, easing:EASE_PROD});
+    });
+  }
+
+  /* ---------- recipe: statement · 大宣言 ----------
+     左半屏标题逐行落下,右半屏 leaked 信息晚 600ms 进 */
+  function rStatement(slide, all){
+    const halves = [...slide.querySelectorAll('.half')];
+    if(halves.length === 2){
+      animate(halves[0], {opacity:[0,1], y:[18,0]},
+        {duration:.7, delay:0, easing:EASE_ENTRY_EXP});
+      animate(halves[1], {opacity:[0,1], y:[18,0]},
+        {duration:.7, delay:.6, easing:EASE_ENTRY_EXP});
+    } else {
+      /* P9 Index Card — 三行像盖章一样依次落 */
+      const head = slide.querySelector('[data-anim="line"]');
+      if(head) fade(head, {duration:.5, y:6});
+      const blocks = all.filter(el=>el !== head);
+      blocks.forEach((el, i)=>{
+        animate(el, {opacity:[0,1], y:[20,0]},
+          {duration:.55, delay:.25 + i*.18, easing:EASE_ENTRY_EXP});
+      });
+    }
+  }
+
+  /* ---------- recipe: grid-reveal · 五个定义 ----------
+     卡片按 nb-corner 序号 01→02→03→04→05→Σ 依次揭示 */
+  function rGridReveal(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.6, y:10});
+    const cards = [...slide.querySelectorAll('.sub-card')];
+    cards.forEach((card, i)=>{
+      animate(card, {opacity:[0,1], y:[20,0], scale:[.96, 1]},
+        {duration:.5, delay:.3 + i*.09, easing:EASE_ENTRY_EXP});
+    });
+  }
+
+  /* ---------- recipe: stack-build · 三层架构 ----------
+     中间 thin 先入 → 上层 fat skills 从顶推下 → 下层 application 从底推上 */
+  function rStackBuild(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.6, y:10});
+
+    const blocks = [...slide.querySelectorAll('.stack-block')];
+    /* 先入: 中间薄层(LAYER 02) */
+    if(blocks[1]) animate(blocks[1], {opacity:[0,1], scaleY:[.85, 1]},
+      {duration:.55, delay:.3, easing:EASE_ENTRY_EXP});
+    /* 上推下: LAYER 01 fat skills 从顶部 push down */
+    if(blocks[0]) animate(blocks[0], {opacity:[0,1], y:[-22, 0]},
+      {duration:.6, delay:.6, easing:EASE_ENTRY_EXP});
+    /* 下推上: LAYER 03 application 从底部 push up */
+    if(blocks[2]) animate(blocks[2], {opacity:[0,1], y:[22, 0]},
+      {duration:.6, delay:.6, easing:EASE_ENTRY_EXP});
+
+    const foot = slide.querySelector('.t-meta');
+    if(foot) animate(foot, {opacity:[0,1]}, {duration:.3, delay:1.3, easing:EASE_PROD});
+  }
+
+  /* ---------- recipe: measure-up · YC KPI 塔 ----------
+     塔从底部 scaleY 0→1 生长 + 数字最后弹入 */
+  function rMeasureUp(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.6, y:10});
+
+    const towers = [...slide.querySelectorAll('.bar-tower')];
+    towers.forEach((tower, i)=>{
+      const block = tower.querySelector('.body-block');
+      if(block){
+        block.style.transformOrigin = 'bottom center';
+        animate(block, {opacity:[0,1], scaleY:[.05, 1]},
+          {duration:.7, delay:.35 + i*.12, easing:EASE_ENTRY_EXP});
+      }
+      /* cap (顶部图标) 等柱体长好后弹入 */
+      const cap = tower.querySelector('.cap');
+      if(cap) animate(cap, {opacity:[0,1], y:[-8, 0]},
+        {duration:.4, delay:.85 + i*.12, easing:EASE_PROD});
+    });
+  }
+
+  /* ---------- recipe: bar-grow · 90% 价值分布 ----------
+     标题先入 → hairline 从中点向两侧 stroke draw → bar 依次 width 0→target → 数值 fade in */
+  function rBarGrow(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.6, y:10});
+
+    /* 中部 hairline:从 100% width 0 拉到 100% (transformOrigin: center) */
+    const midRow = slide.querySelector('[data-anim="up"]');
+    if(midRow){
+      const midLabel = midRow.querySelector('.t-cat');
+      const midLine = midRow.querySelector('div[style*="height:1px"]');
+      if(midLabel) animate(midLabel, {opacity:[0,1], x:[-8,0]},
+        {duration:.4, delay:.4, easing:EASE_PROD});
+      if(midLine){
+        midLine.style.transformOrigin = 'center';
+        animate(midLine, {opacity:[0,1], scaleX:[0, 1]},
+          {duration:.55, delay:.5, easing:EASE_ENTRY_EXP});
+      }
+    }
+
+    /* bar 行依次 width 增长 */
+    const fills = [...slide.querySelectorAll('.row-fill')];
+    const labels = [...slide.querySelectorAll('.row-lbl')];
+    const values = [...slide.querySelectorAll('.row-val')];
+    fills.forEach((fill, i)=>{
+      const target = fill.style.width;
+      fill.style.width = '0%';
+      if(labels[i]) animate(labels[i], {opacity:[0,1], x:[-12,0]},
+        {duration:.4, delay:.85 + i*.14, easing:EASE_PROD});
+      animate(fill, {width:['0%', target]},
+        {duration:.65, delay:.95 + i*.14, easing:EASE_ENTRY_EXP});
+      if(values[i]) animate(values[i], {opacity:[0,1]},
+        {duration:.3, delay:1.5 + i*.14, easing:EASE_PROD});
+    });
+  }
+
+  /* ---------- recipe: duo-mirror · Latent vs Deterministic ----------
+     左 80ms 入,vrule 从中心 scaleY 0→1,右 240ms 入 */
+  function rDuoMirror(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.6, y:10});
+
+    const cols = [...slide.querySelectorAll('.duo-compare .col')];
+    const vrule = slide.querySelector('.duo-compare .vrule');
+    if(cols[0]) animate(cols[0], {opacity:[0,1], x:[-24, 0]},
+      {duration:.65, delay:.4, easing:EASE_ENTRY_EXP});
+    if(vrule){
+      vrule.style.transformOrigin = 'center';
+      animate(vrule, {opacity:[0,1], scaleY:[0, 1]},
+        {duration:.55, delay:.55, easing:EASE_ENTRY_EXP});
+    }
+    if(cols[1]) animate(cols[1], {opacity:[0,1], x:[24, 0]},
+      {duration:.65, delay:.7, easing:EASE_ENTRY_EXP});
+
+    const foot = slide.querySelector('.t-meta');
+    if(foot) animate(foot, {opacity:[0,1]}, {duration:.3, delay:1.3, easing:EASE_PROD});
+  }
+
+  /* ---------- recipe: split-statement · 收尾 ----------
+     左黑半屏的 once / forever 错位入场;右白半屏 takeaway list 后跟 */
+  function rSplitStatement(slide, all){
+    const halves = [...slide.querySelectorAll('.half')];
+    /* 左黑半屏 — once 先入,forever 间隔 600ms */
+    if(halves[0]){
+      animate(halves[0], {opacity:[0,1]}, {duration:.4, easing:EASE_PROD});
+      const kpis = halves[0].querySelectorAll('.kpi-thin');
+      kpis.forEach((k, i)=>{
+        animate(k, {opacity:[0,1], y:[24,0]},
+          {duration:.7, delay:.25 + i*.55, easing:EASE_ENTRY_EXP});
+      });
+    }
+    /* 右白半屏 — list 三条依次入,在左侧 once 出现后开始 */
+    if(halves[1]){
+      animate(halves[1], {opacity:[0,1]}, {duration:.4, delay:.3, easing:EASE_PROD});
+      const items = halves[1].querySelectorAll('.takeaway-list li');
+      items.forEach((li, i)=>{
+        animate(li, {opacity:[0,1], x:[20, 0]},
+          {duration:.45, delay:1.0 + i*.12, easing:EASE_ENTRY_EXP});
+      });
+    }
+  }
+
+  /* ---------- recipe: timeline-walk · P11 横向 evolution ----------
+     标题先入 → 横轴虚线 scaleX 拉开(伪) → 5 个 dot 按年代依次 scale 入 → label 跟随 */
+  function rTimelineWalk(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.55, y:10});
+
+    const tl = slide.querySelector('.timeline-h');
+    if(tl) animate(tl, {opacity:[0,1]}, {duration:.4, delay:.35, easing:EASE_PROD});
+
+    const nodes = [...slide.querySelectorAll('.timeline-h .th-node')];
+    nodes.forEach((node, i)=>{
+      const base = .55 + i*.18;
+      const dot = node.querySelector('.dot');
+      const label = node.querySelector('.label');
+      if(dot){
+        dot.style.transformOrigin='center';
+        animate(dot, {opacity:[0,1], scale:[.2, 1]},
+          {duration:.45, delay:base, easing:EASE_ENTRY_EXP});
+      }
+      if(label){
+        const fromY = node.classList.contains('up') ? 8 : -8;
+        /* 保留 CSS 的水平居中 translateX(-50%),避免动效覆盖后 label 与 dot 错位 */
+        animate(label, {opacity:[0,1], transform:[`translate(-50%, ${fromY}px)`, 'translate(-50%, 0px)']},
+          {duration:.5, delay:base + .12, easing:EASE_ENTRY_EXP});
+      }
+    });
+
+    const foot = slide.querySelector('.t-meta');
+    if(foot) animate(foot, {opacity:[0,1]}, {duration:.3, delay:1.7, easing:EASE_PROD});
+  }
+
+  /* ---------- recipe: manifesto · P12 Form & Found ----------
+     副标先入 → 大字两段错峰落 → 底部 ink 通栏条从下推上 */
+  function rManifesto(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head){
+      const cat = head.querySelector('.t-cat');
+      const title = head.querySelector('div:nth-child(2)');
+      if(cat) animate(cat, {opacity:[0,1], x:[-10,0]},
+        {duration:.4, delay:.1, easing:EASE_PROD});
+      if(title) animate(title, {opacity:[0,1], y:[26, 0]},
+        {duration:.85, delay:.3, easing:EASE_ENTRY_EXP});
+    }
+    /* 底部 ink 条从下推入 */
+    const foot = [...slide.querySelectorAll('[data-anim="up"]')];
+    foot.forEach((el, i)=>{
+      animate(el, {opacity:[0,1], y:[40, 0]},
+        {duration:.75, delay:.85 + i*.12, easing:EASE_ENTRY_EXP});
+    });
+  }
+
+  /* ---------- recipe: three-forces · P13 ----------
+     左 ink hero 先入 → 右 3 张卡按 1/2/3 依次从右滑入 + 每张大数字单独弹入 */
+  function rThreeForces(slide, all){
+    const head = slide.querySelector('[data-anim="line"]');
+    if(head) fade(head, {duration:.5, y:8});
+
+    const grid = slide.querySelector('[data-anim="up"]');
+    if(grid) animate(grid, {opacity:[0,1]}, {duration:.3, delay:.3, easing:EASE_PROD});
+
+    const heroBlock = grid?.querySelector(':scope > div:first-child');
+    if(heroBlock) animate(heroBlock, {opacity:[0,1], x:[-26, 0]},
+      {duration:.6, delay:.4, easing:EASE_ENTRY_EXP});
+
+    const cards = grid ? [...grid.querySelectorAll(':scope > div:nth-child(2) > .card-fill')] : [];
+    cards.forEach((card, i)=>{
+      const base = .6 + i*.18;
+      animate(card, {opacity:[0,1], x:[28, 0]},
+        {duration:.6, delay:base, easing:EASE_ENTRY_EXP});
+      const num = card.querySelector(':scope > div:first-child');
+      if(num) animate(num, {opacity:[0,1], scale:[.7, 1]},
+        {duration:.5, delay:base + .15, easing:EASE_ENTRY_EXP});
+    });
+  }
+
+  /* ---------- recipe: loop-form · P14 自学闭环 ----------
+     左 4 步像台阶依次入 → 右环图节点按时钟顺序入 → 中心 improves scale 入 */
+  function rLoopForm(slide, all){
     const head = slide.querySelector('[data-anim="line"]');
     if(head) fade(head, {duration:.55, y:10});
 
@@ -1040,4 +2698,3 @@
 </script>
 </body>
 </html>
-
