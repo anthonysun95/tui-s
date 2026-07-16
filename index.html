@@ -365,7 +365,796 @@
   }
   .step-desc{
     font-family:var(--sans-zh);
-    fo…9137 tokens truncated…class="v" style="font-size:max(13px,1.05vw)">院内流程信息化，按软件授权收费，不绑定管理效果</div>
+    font-weight:400;
+    font-size:max(12px,.95vw);
+    line-height:1.45;
+    opacity:.72;
+  }
+
+  /* ---------- 网格（layouts.md 所用） ---------- */
+  /* 这些类独立挂到任何容器上都能生效，不依赖 .frame 复合选择器 */
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:minmax(0,1fr);
+    gap:2.4vh 2vw;
+  }
+  /* grid-6 已在旧样式里定义为 3x2，这里仅补 align */
+
+  /* ---------- 图片 frame-img（layouts.md 主命名） ---------- */
+  /* 在旧样式里已定义，这里补 img-cap 命名别名与增强 */
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  .img-cap{
+    display:block;
+    margin-top:.8vh;
+    font-family:var(--mono);
+    font-size:max(10px,.8vw);
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+  /* callout src 命名别名 */
+  .callout-src{
+    display:block;
+    margin-top:1.6vh;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- chrome & foot 补位（layouts.md 简单写法） ---------- */
+  .chrome{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+  /* ============ 动效系统(Motion One 驱动) ============
+     所有 [data-anim] 元素默认隐藏,进入页面时由 JS 逐个揭示。
+     - cascade(默认):按 DOM 顺序 stagger 120ms 淡入 + y:16→0
+     - hero(hero 页自动):慢一点的 stagger 180ms
+     - quote(含 [data-anim="line"]):逐行 600ms 淡入
+     - directional(含 [data-anim="left|right"]):左→分隔线→右
+     - pipeline(data-animate="pipeline"):Space/→ 手动推进
+     Motion One 没加载成功时(CDN 断 + 本地丢),所有 [data-anim] 会兜底显示。
+  */
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.motion-ready [data-animate="pipeline"] [data-anim]{opacity:.15}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,
+  body.low-power *::before,
+  body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],
+  body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  /* ---------- 响应式降级 ---------- */
+  @media (max-width:900px){
+    .display{font-size:16vw}
+    .display-zh{font-size:12vw}
+    .h1-zh{font-size:7vw}
+    .h-hero{font-size:14vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `← → 翻页 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     每页模板参考 references/page-patterns.md
+     页面组件参考 references/components.md
+     ============================================================ -->
+
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>商业计划书 · Business Plan</span><span class="sep"></span><span>2026</span></div>
+    <div class="right"><span>01 / 23</span></div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>主动健康智能体</div>
+    <h1 class="h-hero" data-anim>未医智源</h1>
+    <h2 class="h-sub" data-anim>三甲医院自进化主动健康智能体</h2>
+    <p class="lead" style="max-width:60vw" data-anim>
+      以预防为导向，完成个性化慢病管理、海外来华就医服务，实现医生管理效率、患者疗效与依从性双翻倍。
+    </p>
+    <div class="meta-row" data-anim>
+      <span>未医智源</span><span>·</span><span>临床级 AI Agent</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">未医智源 · Weiyi Zhiyuan</div>
+    <div>Cover</div>
+  </div>
+</section>
+
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>定位 · Positioning</span><span class="sep"></span><span>02 / 23</span></div>
+    <div class="right"><span>02 / 23</span></div>
+  </div>
+  <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>卖结果，不卖工具</div>
+    <h1 class="h-hero" style="font-size:8.5vw" data-anim>三甲医院智能体</h1>
+    <p class="lead" style="max-width:58vw" data-anim>
+      我们帮助国内三甲医院打造<span class="hi">自进化主动健康智能体</span>，把医生从繁琐事务中解放，让慢病管理从"记录"升级为"服务交付"。
+    </p>
+    <div class="grid-3" style="margin-top:4vh; max-width:72vw">
+      <div class="stat" data-anim>
+        <span class="m">FOCUS</span>
+        <span class="n">3</span>
+        <span class="l">大服务场景</span>
+      </div>
+      <div class="stat" data-anim>
+        <span class="m">TARGET</span>
+        <span class="n">三甲</span>
+        <span class="l">头部医院</span>
+      </div>
+      <div class="stat" data-anim>
+        <span class="m">RESULT</span>
+        <span class="n">2×</span>
+        <span class="l">效率与疗效双翻倍</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">项目定位</div>
+    <div>Project Positioning</div>
+  </div>
+</section>
+
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>第一幕 · 市场机遇</span><span class="sep"></span><span>Act I</span></div>
+    <div class="right"><span>03 / 23</span></div>
+  </div>
+  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Act I</div>
+    <h1 class="h-hero" style="font-size:8.8vw" data-anim>为什么是现在</h1>
+    <p class="lead" style="max-width:55vw" data-anim>
+      政策、市场、技术三重窗口同时打开，慢病管理从"成本中心"变成"增长杠杆"。
+    </p>
+  </div>
+  <div class="foot">
+    <div class="title">为什么是现在</div>
+    <div>Act I · Market Opportunity</div>
+  </div>
+</section>
+
+<section class="slide light">
+  <div class="chrome">
+    <div class="left"><span>市场机遇 · 政策</span><span class="sep"></span><span>04 / 23</span></div>
+    <div class="right"><span>04 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:6vh">
+    <div class="kicker" data-anim>Policy</div>
+    <h2 class="h-xl" data-anim>国家战略驱动</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>从健康中国 2030 到单病种防治方案，政策正在把慢病管理推向医院核心 KPI。</p>
+    <div class="col" style="gap:2vh; margin-top:3vh">
+      <div class="rowline" data-anim>
+        <div class="k">健康中国 2030</div>
+        <div class="v">《健康中国 2030 规划纲要》明确要求 2030 年慢病系统连续服务模式在基层广泛应用，服务惠及人群进一步扩大。</div>
+        <div class="m">纲要</div>
+      </div>
+      <div class="rowline" data-anim>
+        <div class="k">国民健康“十五五”</div>
+        <div class="v">《国民健康“十五五”规划》与 2030 纲要共同将慢病管理纳入国家发展主线，明确基层连续服务模式广覆盖目标。</div>
+        <div class="m">规划</div>
+      </div>
+      <div class="rowline" data-anim>
+        <div class="k">单病种防治</div>
+        <div class="v">代谢疾病、心脑血管疾病、慢性呼吸系统疾病等均已出台 2024–2030 专项防治方案。</div>
+        <div class="m">专项</div>
+      </div>
+      <div class="rowline" data-anim>
+        <div class="k">医院绩效考核</div>
+        <div class="v">慢病管理率、控制率纳入绩效考核，科室有充足动力提升管理能力。</div>
+        <div class="m">KPI</div>
+      </div>
+      <div class="rowline" data-anim>
+        <div class="k">国家科技重大专项</div>
+        <div class="v">重点支持慢病数字化转型，为临床级 AI 提供科研与数据背书。</div>
+        <div class="m">科研</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">慢病管理上升为国家战略</div>
+    <div>Policy Driver</div>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left"><span>市场机遇 · 数据</span><span class="sep"></span><span>05 / 23</span></div>
+    <div class="right"><span>05 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Big Numbers</div>
+    <h2 class="h-xl" data-anim>个性化慢病管理</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>供需错配之下，专业服务远未满足需求。</p>
+    <div class="grid-6" style="margin-top:5vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Patients</div>
+        <div class="stat-nb">4<span class="stat-unit">亿+</span></div>
+        <div class="stat-note">全国慢病患者基数</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Manageable</div>
+        <div class="stat-nb">5–6<span class="stat-unit">亿</span></div>
+        <div class="stat-note">需管理人群规模</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Market 2025</div>
+        <div class="stat-nb">3260<span class="stat-unit">亿</span></div>
+        <div class="stat-note">体重管理行业规模</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Economic Burden</div>
+        <div class="stat-nb">1<span class="stat-unit">万亿</span></div>
+        <div class="stat-note">超重肥胖年度经济负担</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">GLP-1 by 2030</div>
+        <div class="stat-nb">1000<span class="stat-unit">亿</span></div>
+        <div class="stat-note">2026 国内 230–450 亿，2030 破千亿</div>
+      </div>
+        <div class="stat-card" data-anim>
+        <div class="stat-label">Doctor Capacity</div>
+        <div class="stat-nb">20</div>
+        <div class="stat-note">单医生当前仅能管理患者数</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:4vh" data-anim>
+      <div class="q-big">GLP-1 等新药普及带来大量用药管理需求，但超半数用药者出现胃肠道不良反应，用药依从性不足 0.5%。</div>
+      <span class="cite">— 行业痛点</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">千亿级缺口待填补</div>
+    <div>Market Numbers</div>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left"><span>市场机遇 · 来华就医</span><span class="sep"></span><span>06 / 23</span></div>
+    <div class="right"><span>06 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Overseas Demand</div>
+    <h2 class="h-xl" data-anim>海外来华就医</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>美国患者两年增幅超 200%，高端医疗旅游成为新增长点。</p>
+    <div class="grid-4" style="margin-top:4vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">International Patients</div>
+        <div class="stat-nb">128<span class="stat-unit">万</span></div>
+        <div class="stat-note">2025 接诊国际患者 128 万人次，较三年前 +73.6%</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">US Patients</div>
+        <div class="stat-nb">15<span class="stat-unit">万</span></div>
+        <div class="stat-note">2025 年美国赴华就医预计人次</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Revenue</div>
+        <div class="stat-nb">89.7<span class="stat-unit">亿美元</span></div>
+        <div class="stat-note">2025 全年医疗旅游总收入（约 640 亿元）</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">US Growth</div>
+        <div class="stat-nb">200<span class="stat-unit">%+</span></div>
+        <div class="stat-note">2023 约 5 万 → 2025 15 万</div>
+      </div>
+    </div>
+    <p class="body-zh" style="margin-top:3vh" data-anim>
+      客源以 30–60 岁中产阶级、企业主、退休人员为主；约 60% 来自美国东西海岸发达地区；普遍拥有基础医保，但对慢病长期管理、高端手术的自付成本敏感。
+    </p>
+    <p class="body-zh" style="margin-top:2vh" data-anim>
+      2025 年专程赴华就医（不含体检、医美）的境外患者达 41.3 万人次，同比增长 63%；预计 2026 年医疗旅游总收入突破百亿美元。
+    </p>
+    <div class="callout" style="margin-top:3vh" data-anim>
+      <div class="q-big">美国患者占比达 22.1%，位列北京协和医院外籍住院患者首位。</div>
+      <span class="cite">— 头部涉外医院数据</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">境外高端医疗需求快速增长</div>
+    <div>Medical Tourism</div>
+  </div>
+</section>
+
+<section class="slide light">
+  <div class="chrome">
+    <div class="left"><span>市场机遇 · 病种结构</span><span class="sep"></span><span>07 / 23</span></div>
+    <div class="right"><span>07 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Cost Comparison</div>
+    <h2 class="h-xl" data-anim>四大慢病核心项目</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>美国患者赴华就医需求高度集中于“高价、长等待、慢病长期管理”类项目。</p>
+    <div class="grid-2-6-6" style="gap:4vw 4vh">
+      <div class="pillar" data-anim>
+        <div class="ic">01</div>
+        <div class="t">肿瘤</div>
+        <div class="d">多为择期手术或高端治疗，本国费用过高、排队过长而选择来华。</div>
+      </div>
+      <div class="pillar" data-anim>
+        <div class="ic">02</div>
+        <div class="t">心血管</div>
+        <div class="d">刚性需求手术类项目，中美同级别三甲医院费用差异显著。</div>
+      </div>
+      <div class="pillar" data-anim>
+        <div class="ic">03</div>
+        <div class="t">代谢病</div>
+        <div class="d">快速增长潜力品类，中西医结合全周期管理 + 药物成本优势。</div>
+      </div>
+      <div class="pillar" data-anim>
+        <div class="ic">04</div>
+        <div class="t">呼吸慢病</div>
+        <div class="d">慢病长期管理需求，康复与理疗平均停留 14–30 天。</div>
+      </div>
+    </div>
+    <div class="frame-cap" style="margin-top:4vh" data-anim>
+      <span class="pf">数据来源</span>
+      <span>2026 国际医疗成本对比报告、头部涉外医院公开报价、CDC 卫生经济数据</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">四大慢病占治疗类需求 70% 以上</div>
+    <div>Disease Focus</div>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left"><span>市场机遇 · 技术窗口</span><span class="sep"></span><span>08 / 23</span></div>
+    <div class="right"><span>08 / 23</span></div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:6vh">
+    <div style="display:flex; flex-direction:column; justify-content:space-between; gap:3vh">
+      <div>
+        <div class="kicker" data-anim>Technology Window</div>
+        <h2 class="h-xl" style="white-space:nowrap; font-size:6.2vw" data-anim>Agent 最佳切入期</h2>
+        <p class="lead" style="margin-top:3vh" data-anim>
+          82% 医疗机构已在生产环境部署 AI，但多数仍停留在“本地化大模型 + 科室知识库”的问答工具阶段。
+        </p>
+        <p class="body-zh" style="margin-top:2vh" data-anim>
+          长时程 Agent 技术恰好支撑全流程服务交付：主动干预、多轮记忆、个性化闭环管理。若晚 1–2 年，基础模型将内置慢病能力，纯工具型产品会被直接替代。
+        </p>
+      </div>
+      <div class="callout" data-anim>
+        “未来模型之间的差距，会越来越体现在进入环境之后的学习速度上。”
+        <div class="callout-src">— 团队判断</div>
+      </div>
+    </div>
+    <figure class="frame-img r-16x10" data-anim style="margin-top:7vh">
+      <img src="images/ai-usage-matrix.png" alt="医生对 AI 用例的了解度与使用率">
+      <figcaption class="img-cap">丁香园中国医生 AI 行为与态度调研 · n=4,150</figcaption>
+    </figure>
+  </div>
+  <div class="foot">
+    <div class="title">Agent 成熟的最佳切入期</div>
+    <div>Technology Window</div>
+  </div>
+</section>
+
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>第二幕 · 产品与服务</span><span class="sep"></span><span>Act II</span></div>
+    <div class="right"><span>09 / 23</span></div>
+  </div>
+  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Act II</div>
+    <h1 class="h-hero" style="font-size:8.8vw" data-anim>产品与服务</h1>
+    <p class="lead" style="max-width:55vw" data-anim>
+      以主动健康智能体为核心，智能体完成主体工作，医生仅做决策兜底。
+    </p>
+  </div>
+  <div class="foot">
+    <div class="title">卖结果，不卖工具</div>
+    <div>Act II · Product & Service</div>
+  </div>
+</section>
+
+<section class="slide dark" data-animate="pipeline">
+  <div class="chrome">
+    <div class="left"><span>产品与服务 · 流程</span><span class="sep"></span><span>10 / 23</span></div>
+    <div class="right"><span>10 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Pipeline</div>
+    <h2 class="h-xl" data-anim>核心服务流程</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>面向人类用户与智能体的跨平台 Flutter 客户端，支持 Agent Network Protocol（ANP）协议族。</p>
+
+    <div class="pipeline-section" data-anim>
+      <div class="pipeline-label">Phase 01 · 患者分层入组</div>
+      <div class="pipeline" data-cols="3">
+        <div class="step" data-anim="step">
+          <div class="step-nb">01</div>
+          <div class="step-title">自动拉取数据</div>
+          <div class="step-desc">智能体自动拉取 HIS 病历、检验检查数据</div>
+        </div>
+        <div class="step" data-anim="step">
+          <div class="step-nb">02</div>
+          <div class="step-title">智能分型评级</div>
+          <div class="step-desc">完成慢病分型、风险评级与入组筛选</div>
+        </div>
+        <div class="step" data-anim="step">
+          <div class="step-nb">03</div>
+          <div class="step-title">生成初评报告</div>
+          <div class="step-desc">自动生成《患者慢病管理初评报告》</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="body-zh" style="margin-top:2.4vh" data-anim>
+      患者分层入组耗时从 30 分钟压缩至 2 分钟，效率提升 15 倍；有自控力的 Agent 可直接操作医疗设备完成个性化检查。
+    </p>
+
+    <div class="pipeline-section" data-anim>
+      <div class="pipeline-label">Phase 02 · 主动全病程管理</div>
+      <div class="pipeline" data-cols="4">
+        <div class="step" data-anim="step">
+          <div class="step-nb">04</div>
+          <div class="step-title">Voice Agent</div>
+          <div class="step-desc">诊中记录与随访规划任务下发</div>
+        </div>
+        <div class="step" data-anim="step">
+          <div class="step-nb">05</div>
+          <div class="step-title">主动干预</div>
+          <div class="step-desc">基于个体数据推送饮食、运动、用药提醒</div>
+        </div>
+        <div class="step" data-anim="step">
+          <div class="step-nb">06</div>
+          <div class="step-title">实验设计</div>
+          <div class="step-desc">医生用自然语言进行个体化实验与统计分析</div>
+        </div>
+        <div class="step" data-anim="step">
+          <div class="step-nb">07</div>
+          <div class="step-title">效果 Review</div>
+          <div class="step-desc">定期 Review 管理效果，严重事件人工兜底</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">患者分层入组 → 主动全病程管理</div>
+    <div>Service Flow</div>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left"><span>产品与服务 · 价值</span><span class="sep"></span><span>11 / 23</span></div>
+    <div class="right"><span>11 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Core Value</div>
+    <h2 class="h-xl" data-anim>核心价值</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>智能体做事务性工作，医生做决策；医院增收、患者获益。</p>
+    <div class="grid-3" style="gap:3vw">
+      <div class="pillar" data-anim>
+        <div class="ic"><i data-lucide="stethoscope" class="ico-lg"></i></div>
+        <div class="t">医生端</div>
+        <div class="d">管理效率提升 <strong>5 倍</strong><br>单医生管理患者从 20 人提升至 100 人</div>
+      </div>
+      <div class="pillar" data-anim>
+        <div class="ic"><i data-lucide="heart-pulse" class="ico-lg"></i></div>
+        <div class="t">患者端</div>
+        <div class="d">疗效、满意度、用药依从性翻倍<br>年管理服务价值 2000–3000 元</div>
+      </div>
+      <div class="pillar" data-anim>
+        <div class="ic"><i data-lucide="building-2" class="ico-lg"></i></div>
+        <div class="t">医院端</div>
+        <div class="d">科室慢病管理率从不足 4% 提升至 20–25%<br>单科室年增收约 200 万元</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">医生、患者、医院三端收益闭环</div>
+    <div>Core Value</div>
+  </div>
+</section>
+
+<section class="slide light">
+  <div class="chrome">
+    <div class="left"><span>产品与服务 · 商业模式</span><span class="sep"></span><span>12 / 23</span></div>
+    <div class="right"><span>12 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Business Model</div>
+    <h2 class="h-xl" data-anim>绑定结果，而非软件授权</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>一次性部署费 + 智能体年服务费 + 科室增收五五分成。</p>
+    <div class="col" style="gap:2vh; margin-top:3vh">
+      <div class="rowline" data-anim>
+        <div class="k">一次性部署费</div>
+        <div class="v">系统对接与临床定制化费用，标杆合同 100 万元</div>
+        <div class="m">CAPEX</div>
+      </div>
+      <div class="rowline" data-anim>
+        <div class="k">智能体年服务费</div>
+        <div class="v">按科室收取的年度服务费用，标杆合同 20 万元 / 年</div>
+        <div class="m">SaaS</div>
+      </div>
+      <div class="rowline" data-anim>
+        <div class="k">增收分成</div>
+        <div class="v">科室慢病管理带来的新增营收，双方五五分成，预计年分成 100 万元</div>
+        <div class="m">Outcome</div>
+      </div>
+      <div class="rowline" data-anim>
+        <div class="k">标杆验证</div>
+        <div class="v">已与上海头部三甲医院签署首个合同，2026 年 Q3 启动患者入组，预计确认收入 120 万元</div>
+        <div class="m">POC</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">绑定结果的服务型收费</div>
+    <div>Business Model</div>
+  </div>
+</section>
+
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>第三幕 · 核心壁垒</span><span class="sep"></span><span>Act III</span></div>
+    <div class="right"><span>13 / 23</span></div>
+  </div>
+  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Act III</div>
+    <h1 class="h-hero" style="font-size:8.8vw" data-anim>核心壁垒</h1>
+    <p class="lead" style="max-width:55vw" data-anim>
+      临床数据、技术代差、复合团队，三道护城河同时指向同一个结果：临床级服务交付。
+    </p>
+  </div>
+  <div class="foot">
+    <div class="title">为什么只有我们能做成</div>
+    <div>Act III · Moat</div>
+  </div>
+</section>
+
+<section class="slide light">
+  <div class="chrome">
+    <div class="left"><span>核心壁垒 · 数据</span><span class="sep"></span><span>14 / 23</span></div>
+    <div class="right"><span>14 / 23</span></div>
+  </div>
+  <div class="frame grid-2-8-4" style="padding-top:6vh">
+    <div>
+      <div class="kicker" data-anim>Data Moat</div>
+      <h2 class="h-xl" data-anim>临床数据壁垒</h2>
+      <p class="lead" style="margin-top:3vh; margin-bottom:3vh" data-anim>
+        背靠国家科技重大专项研发，拥有顶级三甲医院的高质量临床数据与前瞻性科研队列。
+      </p>
+      <p class="body-zh" data-anim>
+        慢病分型、风险模型基于真实世界临床数据训练，效果经过临床验证，远高于通用大模型的泛化效果。数据的专业性、合规性与稀缺性行业领先。
+      </p>
+      <div class="callout" style="margin-top:3vh" data-anim>
+        <div class="q-big">数据质量决定模型上限，临床验证决定能否落地。</div>
+      </div>
+    </div>
+    <div class="col" style="gap:3vh; justify-content:center">
+      <div class="stat" data-anim>
+        <span class="m">National Program</span>
+        <span class="n">重大专项</span>
+        <span class="l">国家科技重大专项研发支撑</span>
+      </div>
+      <div class="stat" data-anim>
+        <span class="m">Top Tier</span>
+        <span class="n">三甲</span>
+        <span class="l">顶级三甲医院前瞻性队列</span>
+      </div>
+      <div class="stat" data-anim>
+        <span class="m">Validated</span>
+        <span class="n">临床</span>
+        <span class="l">效果经过临床验证</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">国家级课题 + 三甲前瞻性队列</div>
+    <div>Data Moat</div>
+  </div>
+</section>
+
+<section class="slide dark" data-animate="directional">
+  <div class="chrome">
+    <div class="left"><span>核心壁垒 · 技术</span><span class="sep"></span><span>15 / 23</span></div>
+    <div class="right"><span>15 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Tech Moat</div>
+    <h2 class="h-xl" data-anim>技术代差</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>区别于行业普遍的“被动上下文堆叠 + 知识隐私混杂”的问答式 AI。</p>
+    <div class="grid-2-6-6" style="gap:4vw 4vh">
+      <div data-anim="left" style="padding:3vh 2vw; border-left:3px solid currentColor; opacity:.55">
+        <div class="kicker" style="opacity:.9">Industry · 行业现状</div>
+        <h3 class="h-md" style="margin-top:2vh">被动问答工具</h3>
+        <ul style="margin-top:3vh; padding-left:1.2em; display:flex; flex-direction:column; gap:1.4vh; font-family:var(--sans-zh); font-size:max(14px,1.1vw); line-height:1.55">
+          <li>本地化大模型 + 科室知识库</li>
+          <li>单点辅助，不覆盖全周期</li>
+          <li>项目烂尾，无法投入临床</li>
+          <li>医生工作量未降低</li>
+        </ul>
+      </div>
+      <div data-anim="right" style="padding:3vh 2vw; border-left:3px solid currentColor">
+        <div class="kicker" style="opacity:.9">Weiyi · 我们</div>
+        <h3 class="h-md" style="margin-top:2vh">自进化主动 Agent</h3>
+        <ul style="margin-top:3vh; padding-left:1.2em; display:flex; flex-direction:column; gap:1.4vh; font-family:var(--sans-zh); font-size:max(14px,1.1vw); line-height:1.55">
+          <li>安全边界与共享医学知识独立</li>
+          <li>主动式管理，替代事务性工作</li>
+          <li>参考 Palantir Ontology 决策体系</li>
+          <li>医生仅决策兜底</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">自进化智能体 vs 被动问答工具</div>
+    <div>Tech Moat</div>
+  </div>
+</section>
+
+<section class="slide light">
+  <div class="chrome">
+    <div class="left"><span>核心壁垒 · 团队</span><span class="sep"></span><span>16 / 23</span></div>
+    <div class="right"><span>16 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Team Moat</div>
+    <h2 class="h-xl" data-anim>团队壁垒</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>少有的能同时看懂临床需求、落地 AI 技术、跑通商业模式的团队。</p>
+    <div class="grid-3" style="gap:3vw">
+      <div class="pillar" data-anim>
+        <div class="ic">Charles</div>
+        <div class="t">董事长</div>
+        <div class="d">复旦临床医学；顶级三甲放射外科医生；欧洲放射学年会口头报告；6 年顶级基金投资经历；公司 Echo 角色。</div>
+      </div>
+      <div class="pillar" data-anim>
+        <div class="ic">Yuantong</div>
+        <div class="t">CEO</div>
+        <div class="d">复旦上海医学院预防医学；哈佛公共卫生硕士；BMJ 第一作者；公司 Delta 角色。</div>
+      </div>
+      <div class="pillar" data-anim>
+        <div class="ic">Hongchen</div>
+        <div class="t">技术顾问</div>
+        <div class="d">复旦大学青年教授；微软亚洲研究院、千问团队背景；Agent 工程化、ontology、智能体硬件生态。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">临床 + 科研 + AI + 投资的复合团队</div>
+    <div>Team Moat</div>
+  </div>
+</section>
+
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>第四幕 · 发展规划</span><span class="sep"></span><span>Act IV</span></div>
+    <div class="right"><span>17 / 23</span></div>
+  </div>
+  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Act IV</div>
+    <h1 class="h-hero" style="font-size:8.8vw" data-anim>发展规划</h1>
+    <p class="lead" style="max-width:55vw" data-anim>
+      从标杆医院到规模化复制，从慢病管理到公共卫生智能体基座。
+    </p>
+  </div>
+  <div class="foot">
+    <div class="title">1 年 · 3 年 · 长期愿景</div>
+    <div>Act IV · Roadmap</div>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left"><span>发展规划 · 路线图</span><span class="sep"></span><span>18 / 23</span></div>
+    <div class="right"><span>18 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Roadmap</div>
+    <h2 class="h-xl" data-anim>三阶段增长</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>医院覆盖、科室拓展、患者规模、营收目标清晰递进。</p>
+
+    <div class="pipeline" data-cols="3">
+      <div class="step" data-anim>
+        <div class="step-nb">1 Year</div>
+        <div class="step-title">短期</div>
+        <div class="step-desc">10–20 家头部三级医院<br>1–2 个核心慢病科室<br>1 万名慢病患者 + 100 名来华就医<br>年营收突破 1000 万元</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">3 Years</div>
+        <div class="step-title">中期</div>
+        <div class="step-desc">300 家各级医院<br>2–3 个核心慢病科室<br>20 万名慢病患者 + 1000 人来华就医<br>年度 ARR 突破 1 亿元</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">Long Term</div>
+        <div class="step-title">长期愿景</div>
+        <div class="step-desc">公共卫生科研智能体基座<br>科学循证健康品牌<br>真实世界长时程评测集</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">短中长期目标</div>
+    <div>Roadmap</div>
+  </div>
+</section>
+
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>第五幕 · 竞争格局</span><span class="sep"></span><span>Act V</span></div>
+    <div class="right"><span>19 / 23</span></div>
+  </div>
+  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Act V</div>
+    <h1 class="h-hero" style="font-size:8.8vw" data-anim>竞争格局</h1>
+    <p class="lead" style="max-width:55vw" data-anim>
+      医疗信息化、消费级 APP、通用 AI 助手、垂直 SaaS——我们处于它们的交叉空白处。
+    </p>
+  </div>
+  <div class="foot">
+    <div class="title">四类玩家，我们的位置</div>
+    <div>Act V · Competition</div>
+  </div>
+</section>
+
+<section class="slide dark">
+  <div class="chrome">
+    <div class="left"><span>竞争格局 · 对比</span><span class="sep"></span><span>20 / 23</span></div>
+    <div class="right"><span>20 / 23</span></div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Competition</div>
+    <h2 class="h-xl" data-anim>赛道玩家分类</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>从“记录工具”到“主动交付服务”，定位差异决定收费模式与天花板。</p>
+    <div class="col" style="gap:1.8vh; margin-top:2vh">
+      <div class="rowline" data-anim style="grid-template-columns:1.2fr 1fr 2.2fr 2.2fr">
+        <div class="k" style="font-size:1.5vw">竞品类型</div>
+        <div class="k" style="font-size:1.5vw">代表</div>
+        <div class="k" style="font-size:1.5vw">核心特点</div>
+        <div class="k" style="font-size:1.5vw">我们差异化</div>
+      </div>
+      <div class="rowline" data-anim style="grid-template-columns:1.2fr 1fr 2.2fr 2.2fr">
+        <div class="k" style="font-size:1.5vw">传统信息化</div>
+        <div class="v" style="font-size:max(13px,1.05vw)">卫宁、东软、医渡</div>
+        <div class="v" style="font-size:max(13px,1.05vw)">院内流程信息化，按软件授权收费，不绑定管理效果</div>
         <div class="v" style="font-size:max(13px,1.05vw)">升级为“主动交付服务”，绑定科室增收结果</div>
       </div>
       <div class="rowline" data-anim style="grid-template-columns:1.2fr 1fr 2.2fr 2.2fr">
@@ -842,4 +1631,3 @@ if(motion){
 </script>
 </body>
 </html>
-
